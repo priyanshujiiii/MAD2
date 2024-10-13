@@ -1,9 +1,33 @@
 const SignUpSponsor = {
   template: `
-    <div> <!-- Root element wrapping the entire component -->
+    <div style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
       <!-- Navigation Bar -->
       <nav class="navbar navbar-expand-lg navbar-dark">
         <a class="navbar-brand" href="#">Open Eye Analytics</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <!-- Sign Up Dropdown -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="signupDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Sign Up
+              </a>
+              <div class="dropdown-menu" aria-labelledby="signupDropdown">
+                <router-link to="/oeanalytics/signup/influencer" class="dropdown-item" href="signin.html">Sign Up as Influencer</router-link>
+                <router-link to="/oeanalytics/signup/sponsor" class="dropdown-item">Sign Up as Sponsor</router-link>
+              </div>
+            </li>
+            <!-- Sign In and Features Links -->
+            <li class="nav-item">
+              <router-link to="/oeanalytics/signin" class="nav-link">Sign In</router-link>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Features</a>
+            </li>
+          </ul>
+        </div>
       </nav>
 
       <!-- Main Content -->

@@ -1,6 +1,6 @@
 const SignIn = {
     template: `
-    <div>
+    <div style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
       <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <a class="navbar-brand" href="#">Open Eye Analytics</a>
@@ -15,13 +15,13 @@ const SignIn = {
                 Sign Up
               </a>
               <div class="dropdown-menu" aria-labelledby="signupDropdown">
-                <router-link to="/signup/influencer" class="dropdown-item" href="signin.html">Sign Up as Influencer</router-link>
-                <router-link to="/signup/sponsor" class="dropdown-item">Sign Up as Sponsor</router-link>
+                <router-link to="/oeanalytics/signup/influencer" class="dropdown-item" href="signin.html">Sign Up as Influencer</router-link>
+                <router-link to="/oeanalytics/signup/sponsor" class="dropdown-item">Sign Up as Sponsor</router-link>
               </div>
             </li>
             <!-- Sign In and Features Links -->
             <li class="nav-item">
-              <router-link to="/signin" class="nav-link">Sign In</router-link>
+              <router-link to="/oeanalytics/signin" class="nav-link">Sign In</router-link>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Features</a>

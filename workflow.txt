@@ -1,0 +1,4 @@
+1) FrontEnd
+2) Backend
+3) Database
+4) testing
