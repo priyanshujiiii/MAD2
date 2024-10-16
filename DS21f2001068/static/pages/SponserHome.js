@@ -10,7 +10,12 @@ const SponserHome = {
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-              <!-- Sign Up Dropdown -->
+              <li class="nav-item">
+                <router-link to="/oeanalytics/SponserDashboard" class="nav-link">Dashboard</router-link>
+              </li>
+              <li class="nav-item">
+                <a :href="logoutURL" class="nav-link">Logout</a>
+              </li>
             </ul>
           </div>
         </nav>
@@ -24,6 +29,11 @@ const SponserHome = {
         </div>
       </div>
     `,
+    data() {
+      return {
+          logoutURL: window.location.origin + "/logout"
+      };
+    },
   };
   
   export default SponserHome;

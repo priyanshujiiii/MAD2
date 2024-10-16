@@ -10,7 +10,12 @@ const AdminHome = {
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-              <!-- Sign Up Dropdown -->
+              <li class="nav-item">
+                <router-link to="/oeanalytics/AdminDashboard" class="nav-link">Dashboard</router-link>
+              </li>
+              <li class="nav-item">
+                <a :href="logoutURL" class="nav-link">Logout</a>
+              </li>
             </ul>
           </div>
         </nav>
@@ -24,6 +29,11 @@ const AdminHome = {
         </div>
       </div>
     `,
+    data() {
+      return {
+          logoutURL: window.location.origin + "/logout"
+      };
+    },
   };
   
   export default AdminHome;

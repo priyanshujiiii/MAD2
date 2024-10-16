@@ -7,7 +7,7 @@
 ##########                        2) Flask Configurations          ################
 ##########                        3) Database                      ################
 ##########                        4) Home Page                     ################
-##########                        5) Sponser                       ################
+##########                        5) Resources                     ################
 ##########                        6) Influencer                    ################
 ##########                        7) Admin                         ################
 ###################################################################################
@@ -38,9 +38,11 @@ from flask import redirect, abort
 from sqlalchemy.orm import relationship
 from flask import flash
 from sqlalchemy import desc
-from flask_security import UserMixin,RoleMixin,Security
+from flask_security import UserMixin,RoleMixin,Security,SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_user
 from flask_security.models import fsqla_v3 as fsq
-from flask_security.utils import hash_password
+from flask_security.utils import hash_password, verify_password
+from flask_wtf.csrf import CSRFProtect
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -58,15 +60,13 @@ security = Security()
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.config['SECRET_KEY'] = 'should-not-be-seen'
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + os.path.join(current_dir, "oeanalytics.sqlite3") 
 
 # In your Flask app configuration, add the following settings
-app.config['SECURITY_PASSWORD_HASH'] = 'bcrypt'
-app.config['SECURITY_PASSWORD_SALT'] = 'salty-password'  # Replace with a secure random value
-app.config['SECURITY_PASSWORD_SINGLE_HASH'] = {'bcrypt'}  # Define the hashing method to use
+app.config['DEBUG'] = True   
+app.config['SECURITY_PASSWORD_SALT'] = 'salty-password'
 app.config['SECURITY_TOKEN_AUTHENTICATION_HEADER'] = 'Authentication-Token'
-
 
 db = SQLAlchemy()
 db.init_app(app)
@@ -129,7 +129,7 @@ class Influencer(db.Model):
     complete = db.Column(db.Integer)
 
 # Role Table
-class Role(db.Model):
+class Role(db.Model, RoleMixin):
     __tablename__ = 'role'
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -158,7 +158,7 @@ class Sponsor(db.Model):
     category = db.Column(db.String, db.ForeignKey('category.category'))
 
 # User Table
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'user'
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -201,13 +201,74 @@ def oeanalytics():
 ###################################################################################
 ##########                        4.1) LogIN                       ################
 ###################################################################################
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security.init_app(app, user_datastore)
+
+app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+app.config['SECURITY_CSRF_PROTECT_MECHANISMS'] = ['session', 'form']
+app.config['SECURITY_CSRF_IGNORE_UNAUTH_ENDPOINTS'] = True
+
+@app.route('/signin', methods=['POST'])
+def signin():
+    print('test.0')
+    data = request.get_json()
+    print('data:', data)  # Debug the data object here
+    if not data:
+        return jsonify({'message': 'Invalid JSON'}), 400
+
+    email = data.get('email')
+    password = data.get('password')
+    print('test.1', 'email:', email, 'password:', password)  # Log credentials for debugging (in real production, avoid logging passwords)
+
+    if not email or not password:
+        return jsonify({'message': 'email or password not provided'}), 400
+
+    user = user_datastore.find_user(email=email)
+    print('test.2', 'user:', user)  # Verify the user lookup
+
+    if not user:
+        return jsonify({'message': 'invalid user'}), 400
+
+    if verify_password(password, user.password):
+        token = user.get_auth_token()
+        print('token:', token)  # Log the generated token for verification
+        return jsonify({'token': token, 'user': user.email, 'role': user.roles[0].name}), 200
+    else:
+        return jsonify({'message': 'invalid password'}), 400
 
 
 ###################################################################################
 ##########                        4.2) SignUp                      ################
 ###################################################################################
+@app.route('/Signup', methods=['POST'])
+def Signup():
+    data = request.get_json()
+
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role')
 
 
+    if not email or not password or not role:
+        return jsonify({'message' : 'invalid input'}), 403
+
+    if user_datastore.find_user(email = email ):
+        return jsonify({'message' : 'user already exists'}), 400
+    
+    if role == 'spon':
+        user_datastore.create_user(email = email, password = hash_password(password), active = False, roles = ['spon'])
+        db.session.commit()
+        return jsonify({'message' : 'Sponser succesfully created, waiting for admin approval'}), 201
+    
+    elif role == 'influ':
+        try :
+            user_datastore.create_user(email = email, password = hash_password(password), active = True, roles=['influ']), 201
+            db.session.commit()
+        except:
+            print('error while creating')
+        return jsonify({'message' : 'Student successfully created'})
+    
+    return jsonify({'message' : 'invalid role'}), 400
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -216,7 +277,7 @@ def oeanalytics():
 ###################################################################################
 ###################################################################################
 ###################################################################################
-##########                        5) Sponser                       ################
+##########                        5) Resources                     ################
 ###################################################################################
 ###################################################################################
 ###################################################################################

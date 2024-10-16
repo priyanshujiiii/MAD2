@@ -16,6 +16,7 @@ body {
 /* Navbar Styling */
 .navbar {
     background-color: #000; /* Dark background */
+    margin-bottom: 0;
 }
 .navbar-brand, .nav-link {
     color: #fff !important;
@@ -170,5 +171,80 @@ height: auto; /* Maintain aspect ratio */
     margin: 50px auto;
 
   }
-  
 
+/* Container for the entire dashboard */
+.main-content {
+    display: flex; /* Use flexbox for layout */
+    margin: 0; /* Ensure no gap from the navbar */
+    padding: 0; /* Remove any padding */
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: #1c1c1e;
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+    height: calc(100vh - 56px); /* Adjust height to avoid gap caused by navbar */
+    width: 250px; /* Sidebar width */
+}
+
+.sidebar ul {
+    padding-left: 0;
+}
+
+.sidebar a {
+    color: #fff;
+    padding: 15px;
+    display: block;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar a:hover {
+    background-color: #00ff00;
+    color:#000;
+}
+
+/* Right Section Styling */
+.col-md-9 {
+    padding: 20px;
+    margin-left: 0; /* Ensure no gap */
+    flex: 1; /* Allows this to take remaining space */
+    background-color: #000; /* Same background as body */
+    overflow: auto; /* Ensure scrollable content */
+}
+
+h1 {
+    color: #fff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto; /* Sidebar height can adjust */
+    }
+
+    .col-md-9 {
+        margin-left: 0; /* Reset margin on smaller screens */
+    }
+}
+
+.list-group-item {
+    background-color: #1c1c1e;
+}
+body {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%; /* Ensure full height */
+}
+
+.navbar {
+    margin-bottom: 0; /* Remove any default margin */
+}
+.card {
+    background-color: #1c1c1e;
+}
