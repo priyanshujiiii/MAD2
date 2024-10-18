@@ -39,9 +39,37 @@ const AdminCategoryList = {
 
             <!-- Right Section for Detail Editing -->
             <div class="col-md-9">
-                <p>cat lists<p>
+                <h1 class="text-white">Category List</h1>
+                <table class="table table-bordered table-striped">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Time</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(item, index) in category" :key="index">
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.date }}</td>
+                        <td>
+                        <button class="btn btn-warning btn-sm table-btn" @click="editCategory(item)">
+                            Edit
+                        </button>
+                        </td>
+                        <td>
+                        <button class="btn btn-danger btn-sm table-btn" @click="deleteCategory(item)">
+                            Delete
+                        </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
+
 
         <!-- Footer -->
         <div class="footer">
@@ -52,9 +80,63 @@ const AdminCategoryList = {
     `,
     data() {
         return {
+            category: [],
             logoutURL: window.location.origin + "/logout"
         };
     },
+    mounted() {
+        // Fetch data when the component is mounted
+        this.fetchCategories(); // Call the method to fetch categories
+    },
+    methods: {
+        fetchCategories() {
+            fetch("/oeanalytics/categories", {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.category = data;  // Assign the fetched data to the category array
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+            });
+        },
+        editCategory(item) {
+            this.$router.push({ 
+                path: '/oeanalytics/AdminDashboard/AdminEditCategory', 
+                query: { category: item.category, description: item.description } 
+            });
+        },
+    
+        deleteCategory(item) {
+            // Make a DELETE request to the API
+            fetch('/oeanalytics/categories', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ category: item.category }), // Send the category name
+            })
+            .then(response => {
+                if (response.ok) { // Check if the response status indicates success (2xx)
+                    return response.json(); // Convert the response to JSON
+                } else {
+                    return response.json().then(errData => {
+                        // If the response is not ok, throw an error with the message from the server
+                        throw new Error(errData.message || "Failed to delete category");
+                    });
+                }
+            })
+            .then(data => {
+                // Successfully deleted the category, re-fetch the categories
+                this.fetchCategories(); // Call the method to refresh the categories
+            })
+            .catch(error => {
+                console.error("Error deleting category:", error);
+                alert("There was an error deleting the category: " + error.message);
+            });
+        },
+    }
 };
 
 export default AdminCategoryList;

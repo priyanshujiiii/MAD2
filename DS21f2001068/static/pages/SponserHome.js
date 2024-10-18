@@ -11,6 +11,9 @@ const SponserHome = {
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
               <li class="nav-item">
+                <router-link to="/oeanalytics/SponserHome/profile" class="nav-link">Profile</router-link>
+              </li>
+              <li class="nav-item">
                 <router-link to="/oeanalytics/SponserDashboard" class="nav-link">Dashboard</router-link>
               </li>
               <li class="nav-item">

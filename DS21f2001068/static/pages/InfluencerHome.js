@@ -10,7 +10,10 @@ const InfluencerHome = {
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
+              <li class="nav-item">
+                <router-link to="/oeanalytics/InfluencerHome/profile" class="nav-link">Profile</router-link>
+              </li>
+              <li class="nav-item">
                 <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
               </li>
               <li class="nav-item">

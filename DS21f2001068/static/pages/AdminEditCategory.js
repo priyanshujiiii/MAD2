@@ -1,4 +1,4 @@
-const AddCategory = {
+const AdminEditCategory = {
     template: `
     <div>
         <!-- Navigation Bar -->
@@ -32,8 +32,6 @@ const AddCategory = {
                     <router-link to="/oeanalytics/AdminDashboard/AdminCampaignList" class="list-group-item">Campaign list</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminRequest" class="list-group-item">Request</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
@@ -47,19 +45,19 @@ const AddCategory = {
                                     <div class="col-md-6">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h4 style="font-size: 20px;">Add Category</h4>
+                                                <h4 style="font-size: 20px;">Edit Category</h4>
                                             </div>
                                             <div class="card-body">
-                                                <form @submit.prevent="submitForm" method="POST" id="categoryForm">
+                                                <form @submit.prevent="submitForm" method="PATCH" id="categoryForm">
                                                     <div class="form-group">
                                                         <label for="category" style="font-size: 17px;">Category:</label>
-                                                        <input type="text" class="form-control" id="category" v-model="category">
+                                                        <input type="text" class="form-control" id="category" v-model="category" required disabled>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="description" style="font-size: 17px;">Description:</label>
-                                                        <textarea class="form-control" id="description" v-model="description" rows="3" style="font-size: 17px;"></textarea>
+                                                        <textarea class="form-control" id="description" v-model="description" rows="3" style="font-size: 17px;" required></textarea>
                                                     </div>
-                                                    <button type="submit" class="btn-submit" id="submitBtn" style="font-size: 17px;" :disabled="isSubmitDisabled">Submit</button>
+                                                    <button type="submit" class="btn-submit" id="submitBtn" style="font-size: 17px;">Submit</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -72,62 +70,48 @@ const AddCategory = {
             </div>
         </div>
 
-
         <!-- Footer -->
         <div class="footer">
             <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
         </div>
-
     </div>
     `,
     data() {
         return {
-            category: '',
-            description: '',
+            category: this.$route.query.category || '',
+            description: this.$route.query.description || '',
             logoutURL: window.location.origin + "/logout"
         };
     },
-    computed: {
-        // Disable submit button if category or description is empty
-        isSubmitDisabled() {
-            return !(this.category.trim() && this.description.trim());
-        }
-    },
     methods: {
-        // Handles form submission
         submitForm() {
-            const payload = {
-                category: this.category,
-                description: this.description,
-                date: '0'
-            };
-
-            // Make a POST request to submit category data
+            // Make a PATCH request to update the category
             fetch('/oeanalytics/categories', {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    category: this.$route.query.category,
+                    description: this.description
+                }), 
             })
             .then(response => {
-                if (response.status === 201) {  // Check if the status code indicates success
-                    return response.json();     // Convert the response to JSON
+                if (response.ok) {
+                    // Redirect to the categories list after successful update
+                    this.$router.push('/oeanalytics/AdminDashboard/AdminCategoryList');
                 } else {
-                    throw new Error("Failed to create category, status code: " + response.status);
+                    return response.json().then(errData => {
+                        throw new Error(errData.message || "Failed to update category");
+                    });
                 }
             })
-            .then(data => {
-                // Successfully created the category, redirect to the Category List
-                this.$router.push('/oeanalytics/AdminDashboard/AdminCategoryList');
-            })
             .catch(error => {
-                console.error("Error submitting category:", error);
-                alert("There was an error submitting the category. Please try again.");
+                console.error("Error updating category:", error);
+                alert("There was an error updating the category: " + error.message);
             });
-        }
-    }
+        },
+    },
 };
 
-export default AddCategory;
-
+export default AdminEditCategory;

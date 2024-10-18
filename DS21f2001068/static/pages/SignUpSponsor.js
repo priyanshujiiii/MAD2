@@ -9,31 +9,20 @@ const SignUpSponsor = {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
-            <!-- Sign Up Dropdown -->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="signupDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Sign Up
-              </a>
-              <div class="dropdown-menu" aria-labelledby="signupDropdown">
-                <router-link to="/oeanalytics/signup/influencer" class="dropdown-item" href="signin.html">Sign Up as Influencer</router-link>
-                <router-link to="/oeanalytics/signup/sponsor" class="dropdown-item">Sign Up as Sponsor</router-link>
-              </div>
-            </li>
-            <!-- Sign In and Features Links -->
             <li class="nav-item">
-              <router-link to="/oeanalytics/signin" class="nav-link">Sign In</router-link>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Features</a>
-            </li>
+                <router-link to="/oeanalytics/SponserDashboard" class="nav-link">Dashboard</router-link>
+              </li>
+              <li class="nav-item">
+                <a :href="logoutURL" class="nav-link">Logout</a>
+              </li>
           </ul>
         </div>
       </nav>
 
       <!-- Main Content -->
       <div class="center-container">
-        <div class="signin-card">
-          <h3>Sign Up</h3>
+        <div class="signin-card1">
+          <h3>Sponsor Profile</h3>
           <form @submit.prevent="submitForm" id="signupForm" enctype="multipart/form-data">
             <div class="container">
                 <!-- Columns for Form -->
@@ -133,11 +122,12 @@ const SignUpSponsor = {
         company_name: '',
         industry: '',
         positions: '',
-        contact: ''
+        contact: '',
+        logoutURL: window.location.origin + "/logout"
       },
       categories: [] // Assuming this will be filled with actual industry categories
     };
-  },
+},
   computed: {
     isFormValid() {
       return Object.values(this.form).every(field => field.trim() !== '');

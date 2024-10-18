@@ -10,6 +10,7 @@ import AdminDash from "../components/AdminDash.js";
 import InfluencerDash from "../components/Influencerdash.js";
 import SponserDash from "../components/SponserDash.js";
 import AddCategory from "../pages/AddCategory.js";
+import AdminEditCategory from "../pages/AdminEditCategory.js";
 import AdminStatistic from "../pages/AdminStatistic.js";
 import AdminCategoryList from "../pages/AdminCategoryList.js";
 import AdminInfluencerList from "../pages/AdminInfluencerList.js";
@@ -32,8 +33,8 @@ import SponserPayments from "../pages/SponserPayments.js";
 
 const routes = [
   { path: "/oeanalytics", component: Home },
-  { path: "/oeanalytics/signup/influencer", component: SignUpInfluencer },
-  { path: "/oeanalytics/signup/sponsor", component: SignUpSponsor },
+  { path: "/oeanalytics/InfluencerHome/profile", component: SignUpInfluencer },
+  { path: "/oeanalytics/SponserHome/profile", component: SignUpSponsor },
   { path: "/oeanalytics/signin", component: SignIn },
   { path: "/oeanalytics/signup", component: SignUp },
   { path: "/oeanalytics/SponserHome", component: SponserHome },
@@ -42,6 +43,7 @@ const routes = [
   { path: "/oeanalytics/AdminDashboard", component: AdminDash },
   { path: "/oeanalytics/AdminDashboard/AdminStatistic", component: AdminStatistic},
   { path: "/oeanalytics/AdminDashboard/AdminAddCategory", component: AddCategory },
+  { path: "/oeanalytics/AdminDashboard/AdminEditCategory", component: AdminEditCategory },
   { path: "/oeanalytics/AdminDashboard/AdminCategoryList", component: AdminCategoryList },
   { path: "/oeanalytics/AdminDashboard/AdminInfluencerList", component: AdminInfluencerList },
   { path: "/oeanalytics/AdminDashboard/AdminSponserList", component: AdminSponserList },

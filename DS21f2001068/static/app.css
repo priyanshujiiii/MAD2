@@ -122,6 +122,24 @@ body {
     align-items: center;
     border-radius: 8px;
 }
+.signin-card1 {
+    background-color: #1c1c1e; /* Apple-like dark gray */
+    color: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 50px auto;
+    max-width: 1600px; /* Increased width */
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+}
+
 /* Centering Container for Signin Card */
 .center-container {
     display: flex;
@@ -187,7 +205,9 @@ height: auto; /* Maintain aspect ratio */
     height: calc(100vh - 56px); /* Adjust height to avoid gap caused by navbar */
     width: 250px; /* Sidebar width */
 }
-
+.card {
+    background-color: #1c1c1e;
+  }
 .sidebar ul {
     padding-left: 0;
 }
@@ -248,3 +268,19 @@ html {
 .card {
     background-color: #1c1c1e;
 }
+.table, .table th, .table td {
+    color: #fff;
+  }
+  
+  .table-btn {
+    width: 80px;
+    text-align: center;
+  }
+
+  .thead-dark th {
+    background-color: #343a40;
+  }
+
+  .table-bordered, .table th, .table td {
+    border-color: #555;
+  }

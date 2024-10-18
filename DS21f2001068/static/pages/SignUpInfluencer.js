@@ -8,31 +8,20 @@ const SignUpInfluencer = {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
-            <!-- Sign Up Dropdown -->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="signupDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Sign Up
-              </a>
-              <div class="dropdown-menu" aria-labelledby="signupDropdown">
-                <router-link to="/oeanalytics/signup/influencer" class="dropdown-item" href="signin.html">Sign Up as Influencer</router-link>
-                <router-link to="/oeanalytics/signup/sponsor" class="dropdown-item">Sign Up as Sponsor</router-link>
-              </div>
-            </li>
-            <!-- Sign In and Features Links -->
-            <li class="nav-item">
-              <router-link to="/oeanalytics/signin" class="nav-link">Sign In</router-link>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Features</a>
-            </li>
+           <li class="nav-item">
+                <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
+              </li>
+              <li class="nav-item">
+                <a :href="logoutURL" class="nav-link">Logout</a>
+              </li>
           </ul>
         </div>
       </nav>
 
       <!-- Main Content -->
       <div class="center-container">
-        <div class="signin-card">
-          <h2>Create a Sponsor Account</h2>
+        <div class="signin-card1">
+          <h2>Influencer profile</h2>
           <form id="signupForm">
             <div class="row" size="17px">
               <!-- Column 1 -->
@@ -140,6 +129,11 @@ const SignUpInfluencer = {
       </div>
     </div>
   `,
+  data() {
+    return {
+        logoutURL: window.location.origin + "/logout"
+    };
+},
 };
 
 export default SignUpInfluencer;
