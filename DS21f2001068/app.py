@@ -596,6 +596,20 @@ class InfluencerAPI(Resource):
         db.session.delete(influencer)
         db.session.commit()
         return {'message': 'Influencer deleted'}, 200
+    
+    @marshal_with(influencer_fields)
+    def put(self):
+        data = request.get_json()
+        
+        # Check if email is present and the influencer exists
+        influencer = Influencer.query.get(data['email'])
+        if not influencer:
+            return {'message': 'Influencer not found'}, 404
+        
+        # If influencer exists, get the sponsors associated with this email
+        sponsors = Influencer.query.filter_by(email=data['email']).all()
+        return sponsors, 200
+
 
 class PaymentAPI(Resource):
     @marshal_with(payment_fields)
@@ -712,8 +726,8 @@ class SponsorAPI(Resource):
             industry=data['industry'],
             positions=data['positions'],
             bio=data['bio'],
-            flag=data['flag'],
-            wallet=data['wallet']
+            flag=10,
+            wallet=0
         )
         db.session.add(new_sponsor)
         db.session.commit()
@@ -741,6 +755,15 @@ class SponsorAPI(Resource):
         db.session.delete(sponsor)
         db.session.commit()
         return {'message': 'Sponsor deleted'}, 200
+    
+    @marshal_with(sponsor_fields)
+    def put(self):
+        data = request.get_json() 
+        if data['email'] and Sponsor.query.get(data['email']):
+            {'message': 'Sponsor not found'}, 404
+        if data['email']:
+            sponsors = Sponsor.query.filter_by(email=data['email']).all()
+            return sponsors, 200
 
 
 # Registering the resources

@@ -24,7 +24,9 @@ import InfluencerIncoming from "../pages/InfluencerIncoming.js";
 import InfluencerOutgoing from "../pages/InfluencerOutgoing.js";
 import InfluenecerPayments from "../pages/InfluenecerPayments.js";
 import SponserMyCampaign from "../pages/SponserMyCampaign.js";
+import SponserHire from "../pages/SponserHire.js";
 import SponserNewCampaign from "../pages/SponserNewCampaign.js";
+import SponserEditCampaign from "../pages/SponserEditCampaign.js";
 import SponserIncoming from "../pages/SponserIncoming.js";
 import SponserOutgoing from "../pages/SponserOutgoing.js";
 import SponserSendRequest from "../pages/SponserSendRequest.js";
@@ -33,8 +35,8 @@ import SponserPayments from "../pages/SponserPayments.js";
 
 const routes = [
   { path: "/oeanalytics", component: Home },
-  { path: "/oeanalytics/InfluencerHome/profile", component: SignUpInfluencer },
-  { path: "/oeanalytics/SponserHome/profile", component: SignUpSponsor },
+  { path: "/oeanalytics/InfluencerHome/MakeProfile", component: SignUpInfluencer },
+  { path: "/oeanalytics/SponserHome/MakeProfile", component: SignUpSponsor },
   { path: "/oeanalytics/signin", component: SignIn },
   { path: "/oeanalytics/signup", component: SignUp },
   { path: "/oeanalytics/SponserHome", component: SponserHome },
@@ -58,7 +60,9 @@ const routes = [
   { path: "/oeanalytics/InfluencerDashboard/InfluenecerPayments", component: InfluenecerPayments },
   { path: "/oeanalytics/SponserDashboard", component: SponserDash },
   { path: "/oeanalytics/SponserDashboard/SponserMyCampaign", component: SponserMyCampaign },
+  { path: "/oeanalytics/SponserDashboard/SponserMyCampaign/hire", component: SponserHire },
   { path: "/oeanalytics/SponserDashboard/SponserNewCampaign", component: SponserNewCampaign },
+  { path: "/oeanalytics/SponserDashboard/SponserEditCampaign", component: SponserEditCampaign },
   { path: "/oeanalytics/SponserDashboard/SponserIncoming", component: SponserIncoming },
   { path: "/oeanalytics/SponserDashboard/SponserOutgoing", component: SponserOutgoing },
   { path: "/oeanalytics/SponserDashboard/SponserSendRequest", component: SponserSendRequest },

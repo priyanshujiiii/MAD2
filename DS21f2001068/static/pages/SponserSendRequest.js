@@ -1,5 +1,4 @@
-const SponserSendRequest ={
-    
+const SponserSendRequest = {
     template: `
     <div>
         <!-- Navigation Bar -->
@@ -31,19 +30,53 @@ const SponserSendRequest ={
                     <router-link to="/oeanalytics/SponserDashboard/SponserOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserSendRequest" class="list-group-item">Send Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
-            <!-- Right Section for Detail Editing -->
+            <!-- Right Section for Influencer Details -->
             <div class="col-md-9">
                 <div class="container">
                     <div class="row mt-4">
                         <div class="col">
-                            <h1>
-                                SponserSendRequest
-                            </h1>
+                            <h1>Send Request to Influencers</h1>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Category</th>
+                                        <th>Instagram ID</th>
+                                        <th>LinkedIn ID</th>
+                                        <th>Facebook ID</th>
+                                        <th>X ID</th>
+                                        <th>Instagram Followers</th>
+                                        <th>LinkedIn Followers</th>
+                                        <th>Facebook Followers</th>
+                                        <th>X Followers</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="influencer in influencers" :key="influencer.email">
+                                        <td>{{ influencer.email }}</td>
+                                        <td>{{ influencer.first_name }}</td>
+                                        <td>{{ influencer.last_name }}</td>
+                                        <td>{{ influencer.category }}</td>
+                                        <td>{{ influencer.instagram_id }}</td>
+                                        <td>{{ influencer.linkedin_id }}</td>
+                                        <td>{{ influencer.facebook_id }}</td>
+                                        <td>{{ influencer.x_id }}</td>
+                                        <td>{{ influencer.insta_f }}</td>
+                                        <td>{{ influencer.linkedin_f }}</td>
+                                        <td>{{ influencer.facebook_f }}</td>
+                                        <td>{{ influencer.x_f }}</td>
+                                        <td>
+                                            <button class="btn btn-primary" @click="sendRequest(influencer.email)">Send Request</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -58,8 +91,37 @@ const SponserSendRequest ={
     `,
     data() {
         return {
-            logoutURL: window.location.origin + "/logout"
+            logoutURL: window.location.origin + "/logout",
+            influencers: [] // Array to hold the fetched influencers
         };
     },
-}
+    methods: {
+        fetchInfluencers() {
+            fetch('/oeanalytics/influencer', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.influencers = data; // Save the fetched influencers
+            })
+            .catch(error => {
+                console.error("Error fetching influencers:", error);
+            });
+        },
+        sendRequest(email) {
+            // Handle sending request to the selected influencer
+            console.log(`Request sent to ${email}`);
+            // Redirect to a dummy link after sending the request
+            this.$router.push('/dummy-page'); // Change this to your actual redirect link
+        }
+    },
+    mounted() {
+        // Fetch influencers when the component is mounted
+        this.fetchInfluencers();
+    }
+};
+
 export default SponserSendRequest;

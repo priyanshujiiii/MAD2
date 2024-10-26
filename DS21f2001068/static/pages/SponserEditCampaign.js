@@ -1,5 +1,4 @@
-import store from "../utils/store.js";
-const SponserNewCampaign = {
+const SponserEditCampaign = {
     template: `
     <div>
         <!-- Navigation Bar -->
@@ -41,7 +40,7 @@ const SponserNewCampaign = {
                         <div class="col">
                             <div class="card">
                                 <div class="card-header">
-                                    <h4>Create New Campaign</h4>
+                                    <h4>Edit Campaign</h4>
                                 </div>
                                 <div class="card-body">
                                     <form @submit.prevent="submitCampaign" id="campaignForm">
@@ -50,17 +49,17 @@ const SponserNewCampaign = {
                                             <div class="col-md-4 form-column">
                                                 <div class="form-group">
                                                     <label for="campaignName" style="font-size: 17px;">Campaign Name</label>
-                                                    <input type="text" class="form-control" id="campaignName" v-model="campaign.campaignname" placeholder="Enter campaign name" required>
+                                                    <input type="text" class="form-control" id="campaignName" v-model="campaign.campaignname" :placeholder="campaign.campaignname">
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="categories" style="font-size: 17px;">Categories:</label>
-                                                    <select class="form-control" id="category" v-model="campaign.category" required>
+                                                    <select class="form-control" id="category" v-model="campaign.category">
                                                         <option v-for="category in categories" :key="category.category" :value="category.category">{{ category.category }}</option>
                                                     </select>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="goals" style="font-size: 17px;">Goals</label>
-                                                    <textarea class="form-control" id="goals" v-model="campaign.goals" rows="3" placeholder="Enter campaign goals" required></textarea>
+                                                    <textarea class="form-control" id="goals" v-model="campaign.goals" :placeholder="campaign.goals" rows="3"></textarea>
                                                 </div>
                                             </div>
 
@@ -68,15 +67,15 @@ const SponserNewCampaign = {
                                             <div class="col-md-4 form-column">
                                                 <div class="form-group">
                                                     <label for="campaignDescription" style="font-size: 17px;">Campaign Description</label>
-                                                    <textarea class="form-control" id="campaignDescription" v-model="campaign.campaign_description" rows="3" placeholder="Enter campaign description" required></textarea>
+                                                    <textarea class="form-control" id="campaignDescription" v-model="campaign.campaign_description" :placeholder="campaign.campaign_description" rows="3"></textarea>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="startDate" style="font-size: 17px;">Start Date</label>
-                                                    <input type="date" class="form-control" id="startDate" v-model="campaign.start_date" required>
+                                                    <input type="date" class="form-control" id="startDate" v-model="campaign.start_date">
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="endDate" style="font-size: 17px;">End Date</label>
-                                                    <input type="date" class="form-control" id="endDate" v-model="campaign.end_date" required>
+                                                    <input type="date" class="form-control" id="endDate" v-model="campaign.end_date">
                                                 </div>
                                             </div>
 
@@ -84,18 +83,18 @@ const SponserNewCampaign = {
                                             <div class="col-md-4 form-column">
                                                 <div class="form-group">
                                                     <label for="budget" style="font-size: 17px;">Budget</label>
-                                                    <input type="number" class="form-control" id="budget" v-model="campaign.budget" placeholder="Enter budget" required>
+                                                    <input type="number" class="form-control" id="budget" v-model="campaign.budget" :placeholder="campaign.budget">
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="visibility" style="font-size: 17px;">Visibility</label>
-                                                    <select class="form-control" id="visibility" v-model="campaign.visibility" required>
+                                                    <select class="form-control" id="visibility" v-model="campaign.visibility">
                                                         <option value="Public">Public</option>
                                                         <option value="Private">Private</option>
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                                        <button type="submit" class="btn btn-primary">Update Campaign</button>
                                     </form>
                                 </div>
                             </div>    
@@ -113,26 +112,14 @@ const SponserNewCampaign = {
     `,
     data() {
         return {
+            campaign: this.$route.query.item, // Load the campaign data from the query parameters
             categories: [],
-            campaign: {
-                campaignname: '',
-                category: '',
-                goals: '',
-                email: '', // Add the sponser email here
-                campaign_description: '',
-                start_date: '',
-                end_date: '',
-                visibility: 'Public',
-                budget: 0,
-                flag: 0,
-                alloted: 0,
-                payment: 0
-            },
             logoutURL: window.location.origin + "/logout"
         };
     },
     mounted() {
         // Fetch categories when the component is mounted
+        console.log(this.campaign)
         this.fetchCategories();
     },
     methods: {
@@ -150,10 +137,10 @@ const SponserNewCampaign = {
         },
         submitCampaign() {
             // Add sponsor email to the campaign data
-            this.campaign.email = store.state.user; // Change this to the actual sponsor's email
+            this.campaign.email = localStorage.getItem("email"); // Ensure sponsor's email is included
 
-            fetch('/oeanalytics/campaign', {
-                method: 'POST',
+            fetch(`/oeanalytics/campaign`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -161,17 +148,17 @@ const SponserNewCampaign = {
             })
             .then(response => {
                 if (response.ok) {
-                    // Redirect to the sponsor's My Campaigns page
+                    // Redirect to the sponsor's My Campaigns page after successful edit
                     this.$router.push('/oeanalytics/SponserDashboard/SponserMyCampaign');
                 } else {
-                    console.error('Error submitting campaign:', response);
+                    console.error('Error updating campaign:', response);
                 }
             })
             .catch(error => {
-                console.error('Error submitting campaign:', error);
+                console.error('Error updating campaign:', error);
             });
         }
     }
 };
 
-export default SponserNewCampaign;
+export default SponserEditCampaign;
