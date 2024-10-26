@@ -149,6 +149,7 @@ const SponserMyCampaign = {
                 query: { campaign: JSON.stringify(campaign) } 
             });
         },
+        
         handleLogout() {
             // Commit the logout mutation to clear user state
             store.commit('logout');
