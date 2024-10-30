@@ -600,11 +600,22 @@ class InfluencerAPI(Resource):
     @marshal_with(influencer_fields)
     def put(self):
         data = request.get_json()
+        if data['campaign_id']:
+            subquery = db.session.query(Request.influencer_email).filter(
+                Request.campaign_id == data['campaign_id']
+            ).subquery()
+            
+            # Query influencers whose email is not in the subquery (i.e., not in the request table for that campaign_id)
+            influencers_not_in_request_for_campaign = db.session.query(Influencer).filter(
+                ~Influencer.email.in_(subquery)
+            ).all()
+            return influencers_not_in_request_for_campaign,200
         
         # Check if email is present and the influencer exists
         influencer = Influencer.query.get(data['email'])
         if not influencer:
             return {'message': 'Influencer not found'}, 404
+        
         
         # If influencer exists, get the sponsors associated with this email
         sponsors = Influencer.query.filter_by(email=data['email']).all()

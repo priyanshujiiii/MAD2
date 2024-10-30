@@ -28,57 +28,35 @@ const SponserSendRequest = {
                     <router-link to="/oeanalytics/SponserDashboard/SponserNewCampaign" class="list-group-item">New Campaign</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
-                    <router-link to="/oeanalytics/SponserDashboard/SponserSendRequest" class="list-group-item">Send Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserPayments" class="list-group-item">Payments</router-link>
                 </ul>
             </div>
 
             <!-- Right Section for Influencer Details -->
             <div class="col-md-9">
-                <div class="container">
-                    <div class="row mt-4">
-                        <div class="col">
-                            <h1>Send Request to Influencers</h1>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Email</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Category</th>
-                                        <th>Instagram ID</th>
-                                        <th>LinkedIn ID</th>
-                                        <th>Facebook ID</th>
-                                        <th>X ID</th>
-                                        <th>Instagram Followers</th>
-                                        <th>LinkedIn Followers</th>
-                                        <th>Facebook Followers</th>
-                                        <th>X Followers</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="influencer in influencers" :key="influencer.email">
-                                        <td>{{ influencer.email }}</td>
-                                        <td>{{ influencer.first_name }}</td>
-                                        <td>{{ influencer.last_name }}</td>
-                                        <td>{{ influencer.category }}</td>
-                                        <td>{{ influencer.instagram_id }}</td>
-                                        <td>{{ influencer.linkedin_id }}</td>
-                                        <td>{{ influencer.facebook_id }}</td>
-                                        <td>{{ influencer.x_id }}</td>
-                                        <td>{{ influencer.insta_f }}</td>
-                                        <td>{{ influencer.linkedin_f }}</td>
-                                        <td>{{ influencer.facebook_f }}</td>
-                                        <td>{{ influencer.x_f }}</td>
-                                        <td>
-                                            <button class="btn btn-primary" @click="sendRequest(influencer.email)">Send Request</button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div class="card-header">
+                    <h4 style="font-size: 20px;">Send Request</h4>
+                </div>
+                <div class="card-body">
+                    <form @submit.prevent="sendRequest">
+                        <div class="form-group">
+                            <label for="Requirements" style="font-size: 17px;">Requirements</label>
+                            <input type="text" class="form-control" id="Requirements" v-model="form.requirements" required>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label for="Message" style="font-size: 17px;">Message</label>
+                            <textarea class="form-control" id="Message" v-model="form.messages" rows="3" required style="font-size: 17px;"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="Amount" style="font-size: 17px;">Amount</label>
+                            <input type="text" class="form-control" id="Amount" v-model="form.payment_amount" required style="font-size: 17px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="Role" style="font-size: 17px;">Role</label>
+                            <input type="text" class="form-control" id="Role" v-model="form.role" required style="font-size: 17px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="font-size: 17px;">Submit</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -92,35 +70,46 @@ const SponserSendRequest = {
     data() {
         return {
             logoutURL: window.location.origin + "/logout",
-            influencers: [] // Array to hold the fetched influencers
+            form: {
+                influencer_email: "", // Populate with influencer email when available
+                sponser_email: "", // Your sponser email
+                campaign_id: "", // Set to the current campaign ID
+                campaign_name: "", // Set to the current campaign name
+                status: "Pending", // Default status
+                payment_amount: "",
+                requirements: "",
+                messages: "",
+                role: "",
+                category: "" // Set as needed
+            }
         };
     },
     methods: {
-        fetchInfluencers() {
+        sendRequest() {
             fetch('/oeanalytics/influencer', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify(this.form)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+                return response.json();
+            })
             .then(data => {
-                this.influencers = data; // Save the fetched influencers
+                console.log("Request successfully sent:", data);
+                // Redirect or show success message as needed
             })
             .catch(error => {
-                console.error("Error fetching influencers:", error);
+                console.error("Error sending request:", error);
             });
-        },
-        sendRequest(email) {
-            // Handle sending request to the selected influencer
-            console.log(`Request sent to ${email}`);
-            // Redirect to a dummy link after sending the request
-            this.$router.push('/dummy-page'); // Change this to your actual redirect link
         }
     },
     mounted() {
-        // Fetch influencers when the component is mounted
-        this.fetchInfluencers();
+        // You can set values for `sponser_email`, `campaign_id`, and other fields here if they're dynamic
     }
 };
 

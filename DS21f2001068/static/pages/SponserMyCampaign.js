@@ -30,7 +30,7 @@ const SponserMyCampaign = {
                     <router-link to="/oeanalytics/SponserDashboard/SponserNewCampaign" class="list-group-item">New Campaign</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
-                    <router-link to="/oeanalytics/SponserDashboard/SponserSendRequest" class="list-group-item">Send Request</router-link>
+                    
                     <router-link to="/oeanalytics/SponserDashboard/SponserPayments" class="list-group-item">Payments</router-link>
                 </ul>
             </div>
