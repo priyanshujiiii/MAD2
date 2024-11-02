@@ -149,7 +149,7 @@ const SponserEditCampaign = {
             .then(response => {
                 if (response.ok) {
                     // Redirect to the sponsor's My Campaigns page after successful edit
-                    this.$router.push('/oeanalytics/SponserDashboard/SponserMyCampaign');
+                    this.$router.push('/oeanalytics/SponserDashboard/SponserMyRequest');
                 } else {
                     console.error('Error updating campaign:', response);
                 }

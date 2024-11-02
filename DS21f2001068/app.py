@@ -328,6 +328,11 @@ CategoryResources ={
     'date': fields.String  
 }
 
+CategoryResourcess = {
+    'category': fields.String,
+    'count': fields.Integer
+}
+
 class CategoryResource(Resource):
     @marshal_with(CategoryResources)
     def get(self):
@@ -400,6 +405,23 @@ class CategoryResource(Resource):
         db.session.commit()
 
         return {'message': 'Category deleted successfully'}, 200
+    
+    @marshal_with(CategoryResourcess)
+    def put(self):
+        result = (
+        db.session.query(Campaign.category, func.count(Campaign.campaignid))
+        .filter(Campaign.alloted == 0)
+        .group_by(Campaign.category)
+        .all()
+        )
+
+
+        # Convert query result to a list of dictionaries
+        data = [{"category": category, "count": count} for category, count in result]
+        print(data)
+
+        # Return JSON response (for a Flask route)
+        return data,200
 
 
 api.add_resource(CategoryResource, '/categories')
@@ -600,7 +622,8 @@ class InfluencerAPI(Resource):
     @marshal_with(influencer_fields)
     def put(self):
         data = request.get_json()
-        if data['campaign_id']:
+        campaign_id = data.get('campaign_id')
+        if campaign_id:
             subquery = db.session.query(Request.influencer_email).filter(
                 Request.campaign_id == data['campaign_id']
             ).subquery()
@@ -675,17 +698,21 @@ class RequestAPI(Resource):
     @marshal_with(request_fields)
     def post(self):
         data = request.get_json()
+        campaign = Campaign.query.filter_by(campaignid=data['campaign_id']).first()
+        if not campaign:
+            return {'message': 'Campaign not found'}, 404
+        
         new_request = Request(
             influencer_email=data['influencer_email'],
             sponser_email=data['sponser_email'],
             campaign_id=data['campaign_id'],
-            campaign_name=data['campaign_name'],
+            campaign_name=campaign.campaignname,
             status=data['status'],
-            payment_amount=data['payment_amount'],
+            payment_amount=campaign.budget,
             requirements=data['requirements'],
             messages=data['messages'],
             role=data['role'],
-            category=data['category']
+            category=campaign.category
         )
         db.session.add(new_request)
         db.session.commit()
@@ -694,12 +721,14 @@ class RequestAPI(Resource):
     @marshal_with(request_fields)
     def patch(self):
         data = request.get_json()
-        request_record = Request.query.get(data['request_id'])
+        request_id = data.get('request_id')
+        request_record = Request.query.filter_by(request_id=request_id).first()
         if not request_record:
             return {'message': 'Request not found'}, 404
 
         for key, value in data.items():
-            setattr(request_record, key, value)
+            if  key != 'request_id':
+                setattr(request_record, key, value)
 
         db.session.commit()
         return request_record, 200
@@ -713,6 +742,32 @@ class RequestAPI(Resource):
         db.session.delete(request_record)
         db.session.commit()
         return {'message': 'Request deleted'}, 200
+    
+    @marshal_with(request_fields)
+    def put(self):
+        data = request.get_json()
+        email = data.get('email')
+        role = data.get('role')
+        request_id = data.get('id')
+        
+        requests = []
+        
+        if role == 'spon':
+            requests = Request.query.filter_by(sponser_email=email, role=role).all()
+        elif role == 'influ':
+            requests = Request.query.filter_by(influencer_email=email, role=role).all()
+        if request_id:
+            request_record = Request.query.filter_by(request_id=request_id).first()
+            if request_record:
+                requests.append(request_record)
+
+        if not requests:
+            return {'message': 'No requests found'}, 404
+        
+        return requests, 200
+
+
+
 
 class SponsorAPI(Resource):
     @marshal_with(sponsor_fields)

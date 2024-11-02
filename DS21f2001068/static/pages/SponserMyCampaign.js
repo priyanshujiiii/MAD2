@@ -40,7 +40,7 @@ const SponserMyCampaign = {
                 <div class="container">
                     <div class="row mt-4">
                         <div class="col">
-                            <h1>Sponsor My Campaigns</h1>
+                            <h1>My Campaigns</h1>
                             
                             <table class="table table-bordered">
                                 <thead>

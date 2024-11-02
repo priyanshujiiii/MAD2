@@ -8,6 +8,7 @@ import AdminHome from "../pages/AdminHome.js";
 import InfluencerHome from "../pages/InfluencerHome.js";
 import AdminDash from "../components/AdminDash.js";
 import InfluencerDash from "../components/Influencerdash.js";
+import InfluencerExplore from "../pages/InfluencerExplore.js";
 import SponserDash from "../components/SponserDash.js";
 import AddCategory from "../pages/AddCategory.js";
 import AdminEditCategory from "../pages/AdminEditCategory.js";
@@ -30,6 +31,7 @@ import SponserEditCampaign from "../pages/SponserEditCampaign.js";
 import SponserIncoming from "../pages/SponserIncoming.js";
 import SponserOutgoing from "../pages/SponserOutgoing.js";
 import SponserSendRequest from "../pages/SponserSendRequest.js";
+import SponserEditRequest from "../pages/SponserEditRequest.js";
 import SponserPayments from "../pages/SponserPayments.js";
 
 
@@ -52,6 +54,7 @@ const routes = [
   { path: "/oeanalytics/AdminDashboard/AdminCampaignList", component: AdminCampaignList },
   { path: "/oeanalytics/AdminDashboard/AdminRequest", component: AdminRequest },
   { path: "/oeanalytics/AdminDashboard/AdminPayments", component: AdminPayments },
+  { path: "/oeanalytics/InfluencerDashboard/Explore", component: InfluencerExplore },
   { path: "/oeanalytics/InfluencerDashboard", component: InfluencerDash },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerMyCampaign", component: InfluencerMyCampaign },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerEditProfile", component: InfluencerEditProfile },
@@ -66,6 +69,7 @@ const routes = [
   { path: "/oeanalytics/SponserDashboard/SponserIncoming", component: SponserIncoming },
   { path: "/oeanalytics/SponserDashboard/SponserOutgoing", component: SponserOutgoing },
   { path: "/oeanalytics/SponserDashboard/SponserSendRequest", component: SponserSendRequest },
+  { path: "/oeanalytics/SponserDashboard/SponserEditRequest", component: SponserEditRequest },
   { path: "/oeanalytics/SponserDashboard/SponserPayments", component: SponserPayments },
 ];
 

@@ -1,5 +1,5 @@
-const SponserOutgoing ={
-    
+import store from "../utils/store.js";
+const SponserOutgoing = {
     template: `
     <div>
         <!-- Navigation Bar -->
@@ -30,8 +30,6 @@ const SponserOutgoing ={
                     <router-link to="/oeanalytics/SponserDashboard/SponserIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
@@ -40,9 +38,58 @@ const SponserOutgoing ={
                 <div class="container">
                     <div class="row mt-4">
                         <div class="col">
-                            <h1>
-                                SponserOutgoing
-                            </h1>
+                            <h1>Outgoing Ad Request</h1>
+                            <!-- Status Filter Links -->
+                            <div class="btn-group" role="group" aria-label="Status Filter">
+                                <button @click="filterStatus(null)" class="btn btn-outline-primary">All</button>
+                                <button @click="filterStatus(0)" class="btn btn-outline-secondary">Not Responded</button>
+                                <button @click="filterStatus(1)" class="btn btn-outline-success">Accepted</button>
+                                <button @click="filterStatus(2)" class="btn btn-outline-danger">Rejected</button>
+                            </div>
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Request</th>
+                                        <th>Influencer Email</th>
+                                        <th>Campaign ID</th>
+                                        <th>Campaign Name</th>
+                                        <th>Payment Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                        <th>Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="request in filteredRequests" :key="request.request_id">
+                                        <td>{{ request.request_id }}</td>
+                                        <td>{{ request.influencer_email }}</td>
+                                        <td>{{ request.campaign_id }}</td>
+                                        <td>{{ request.campaign_name }}</td>
+                                        <td>{{ request.payment_amount }}</td>
+                                        <td>{{ getStatusText(request.status) }}</td>
+                                        <td>
+                                            <button 
+                                                @click="deleteRequest(request.request_id)" 
+                                                :disabled="request.status > 2"
+                                                class="btn btn-danger btn-sm">
+                                                {{ request.status > 2 ? 'Delete Not Allowed' : 'Delete' }}
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button 
+                                                v-if="request.status <= 2" 
+                                                @click="editRequest(request.request_id)" 
+                                                class="btn btn-primary btn-sm">
+                                                Edit
+                                            </button>
+                                            <button v-else class="btn btn-secondary btn-sm" disabled>
+                                                {{ getStatusText(request.status) }}
+                                            </button>
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -57,8 +104,73 @@ const SponserOutgoing ={
     `,
     data() {
         return {
-            logoutURL: window.location.origin + "/logout"
+            logoutURL: window.location.origin + "/logout",
+            requests: [], 
+            statusFilter: null
         };
     },
-}
+    computed: {
+        filteredRequests() {
+            if (this.statusFilter === null) return this.requests;
+            return this.requests.filter(request => request.status === this.statusFilter);
+        }
+    },
+    methods: {
+        async editRequest(requestId) {
+            this.$router.push({ 
+                path: '/oeanalytics/SponserDashboard/SponserEditRequest', 
+                query: { request_id:requestId } 
+            });
+        },
+        async fetchData() {
+            try {
+                const response = await fetch("/oeanalytics/request", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ role: "spon", email: store.state.user })
+                });
+                const data = await response.json();
+                this.requests = data;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        },
+        async deleteRequest(request_id) {
+            try {
+                const response = await fetch("/oeanalytics/request", {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ request_id })
+                });
+                const result = await response.json();
+                if (result.message === "Request deleted") {
+                    this.requests = this.requests.filter(request => request.request_id !== request_id);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error("Error deleting request:", error);
+            }
+        },
+        filterStatus(status) {
+            this.statusFilter = status;
+        },
+        getStatusText(status) {
+            const statusText = {
+                0: "Not Responded",
+                1: "Accepted",
+                2: "Rejected",
+                3: "Ad Closed",
+                4: "Campaign Banned",
+                5: "Influencer Banned",
+                6: "Sponser Banned"
+            };
+            return statusText[status] || "Unknown";
+        }
+    },
+    mounted() {
+        this.fetchData();
+    }
+};
+
 export default SponserOutgoing;
