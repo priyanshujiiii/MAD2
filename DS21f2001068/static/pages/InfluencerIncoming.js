@@ -41,8 +41,15 @@ const InfluencerIncoming ={
                     <div class="row mt-4">
                         <div class="col">
                             <h1>
-                                InfluencerIncoming
+                                Incoming Ad Request
                             </h1>
+                            <div class="btn-group" role="group" aria-label="Status Filter">
+                                <button @click="filterStatus(null)" class="btn btn-outline-primary">All</button>
+                                <button @click="filterStatus(0)" class="btn btn-outline-secondary">Not Responded</button>
+                                <button @click="filterStatus(1)" class="btn btn-outline-success">Accepted</button>
+                                <button @click="filterStatus(2)" class="btn btn-outline-danger">Rejected</button>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>

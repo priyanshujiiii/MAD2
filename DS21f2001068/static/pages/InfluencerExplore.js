@@ -2,6 +2,7 @@ const InfluencerExplore = {
     data() {
       return {
         categories: [], // To store fetched categories and their counts
+        logoutURL: `${window.location.origin}/logout`
       };
     },
     template: `
@@ -22,21 +23,30 @@ const InfluencerExplore = {
               <li class="nav-item">
                 <router-link to="/oeanalytics/signin" class="nav-link">Sign In</router-link>
               </li>
+              <li class="nav-item">
+              <a :href="logoutURL" class="nav-link">Logout</a>
+              </li>
             </ul>
           </div>
         </nav>
+        <div class="hero-section">
+          <h1>Welcome to Open Eye Analytics</h1>
+          <p>Your trusted partner in data-driven insights and solutions.</p>
+          <a >Get Started</a>
+        </div>
         
         <!-- Category Section -->
         <div class="container">
-          <h2 class="section-title">Our Categories</h2>
+          <h2 class="section-title">Explore Categories</h2>
+
           <div class="row">
-            <div class="col-md-4" v-for="(count, category) in categories" :key="category">
+            <div class="col-md-4" v-for="category in categories" :key="category">
               <div class="category-card">
-                <h3>{{ category }}</h3>
-                <p>Number of campaigns: {{ count }}</p>
+                <h3>{{ category.category }}</h3>
+                <p>Number of campaigns: {{ category.count }}</p>
                 <!-- View Campaigns Button -->
                 <button 
-                  @click="viewCampaigns(category)" 
+                  @click="viewCampaigns(category.category)" 
                   class="btn btn-primary">
                   View
                 </button>
@@ -76,7 +86,10 @@ const InfluencerExplore = {
   
       // Method to handle button click and navigate to the campaigns page
       viewCampaigns(category) {
-        this.$router.push({ path: '/campaigns', query: { category } });
+        this.$router.push({ 
+          path: '/oeanalytics/InfluencerDashboard/Explore/campaign',
+          query: { category }
+        });
       },
     },
   };

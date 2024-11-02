@@ -409,17 +409,17 @@ class CategoryResource(Resource):
     @marshal_with(CategoryResourcess)
     def put(self):
         result = (
-        db.session.query(Campaign.category, func.count(Campaign.campaignid))
-        .filter(Campaign.alloted == 0)
-        .group_by(Campaign.category)
-        .all()
+            db.session.query(
+                Category.category,
+                func.count(Campaign.campaignid).label("count")
+            )
+            .outerjoin(Campaign, (Category.category == Campaign.category) & (Campaign.alloted == 0))
+            .group_by(Category.category)
+            .all()
         )
-
 
         # Convert query result to a list of dictionaries
         data = [{"category": category, "count": count} for category, count in result]
-        print(data)
-
         # Return JSON response (for a Flask route)
         return data,200
 
@@ -559,6 +559,20 @@ class CampaignAPI(Resource):
         db.session.delete(campaign)
         db.session.commit()
         return {'message': 'Campaign deleted'}, 200
+    
+    @marshal_with(campaign_fields)
+    def put(self):
+        data = request.get_json()
+        desired_category = data.get('category')
+
+        # Filter campaigns based on the specified conditions
+        campaigns = Campaign.query.filter_by(
+            category=desired_category,
+            alloted=0,  # Corrected spelling
+            visibility='Public'  # Assuming visibility is case-sensitive
+        ).all()
+        return campaigns, 200
+
 
 class InfluencerAPI(Resource):
     @marshal_with(influencer_fields)
@@ -704,7 +718,7 @@ class RequestAPI(Resource):
         
         new_request = Request(
             influencer_email=data['influencer_email'],
-            sponser_email=data['sponser_email'],
+            sponser_email=campaign.email,
             campaign_id=data['campaign_id'],
             campaign_name=campaign.campaignname,
             status=data['status'],
@@ -749,7 +763,8 @@ class RequestAPI(Resource):
         email = data.get('email')
         role = data.get('role')
         request_id = data.get('id')
-        
+        campaign_id = data.get('campaign_id')
+
         requests = []
         
         if role == 'spon':
@@ -760,7 +775,16 @@ class RequestAPI(Resource):
             request_record = Request.query.filter_by(request_id=request_id).first()
             if request_record:
                 requests.append(request_record)
+        if campaign_id:
+            request_record = Request.query.filter_by(
+                campaign_id=campaign_id,
+                influencer_email=data['influencer_email']
+            ).first()
 
+            if request_record:
+                return {"message": "request already exists"}, 400
+            else:
+                return "", 200
         if not requests:
             return {'message': 'No requests found'}, 404
         

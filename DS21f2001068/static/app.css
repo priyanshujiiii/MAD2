@@ -373,7 +373,7 @@ html {
 }
 
 .hero-section {
-    background-color: #003366; /* Dark blue */
+    background-color: #343a40; /* Dark blue */
     color: #ffffff;
     padding: 100px 0;
     text-align: center;
@@ -387,10 +387,32 @@ html {
     margin: 50px 0 30px;
 }
 .category-card {
+    background-color: #343a40;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 20px;
     margin: 20px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
+}
+
+.viewcard {
+    margin-bottom: 20px;
+    border-radius: 0; /* Removes rounded corners for a rectangular look */
+    border: 1px solid #ddd; /* Adds a border to the card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a shadow for better separation */
+}
+.viewcard-header, .card-body {
+    padding: 15px;
+}
+.viewcard-img-top {
+    width: 300px;
+    height: 300px;
+    object-fit: cover; /* Ensures the image covers the area */
+}
+.viewcard-title {
+    font-size: 17px;
+}
+.viewcard-body p {
+    font-size: 17px;
 }
