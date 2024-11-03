@@ -1,3 +1,4 @@
+import store from "../utils/store.js";
 const SponserIncoming ={
     
     template: `
@@ -42,15 +43,64 @@ const SponserIncoming ={
                 <div class="container">
                     <div class="row mt-4">
                         <div class="col">
-                            <h1>
-                                SponserIncoming
-                            </h1>
+                            <h1>Incoming Ad Request</h1>
+                            <div class="btn-group" role="group" aria-label="Status Filter">
+                                <button @click="filterStatus(null)" class="btn btn-outline-primary">All</button>
+                                <button @click="filterStatus(0)" class="btn btn-outline-secondary">Not Responded</button>
+                                <button @click="filterStatus(1)" class="btn btn-outline-success">Accepted</button>
+                                <button @click="filterStatus(2)" class="btn btn-outline-danger">Rejected</button>
+                            </div>
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Request</th>
+                                        <th>Sponser Email</th>
+                                        <th>Campaign ID</th>
+                                        <th>Campaign Name</th>
+                                        <th>Payment Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="request in filteredRequests" :key="request.request_id">
+                                        <td>{{ request.request_id }}</td>
+                                        <td>{{ request.sponser_email }}</td>
+                                        <td>{{ request.campaign_id }}</td>
+                                        <td>{{ request.campaign_name }}</td>
+                                        <td>{{ request.payment_amount }}</td>
+                                        <td>{{ getStatusText(request.status) }}</td>
+                                        <td>
+                                            <button 
+                                                v-if="request.status === 0" 
+                                                class="btn btn-success btn-sm" 
+                                                @click="acceptRequest( request.request_id)"
+                                            >
+                                                Accept
+                                            </button>
+                                            <button 
+                                                v-if="request.status === 0" 
+                                                class="btn btn-danger btn-sm" 
+                                                @click="rejectRequest( request.request_id)"
+                                            >
+                                                Reject
+                                            </button>
+                                            <button 
+                                                v-else 
+                                                class="btn btn-secondary btn-sm" 
+                                                disabled
+                                            >
+                                                {{ getStatusText(request.status) }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <!-- Footer -->
         <div class="footer">
             <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
@@ -59,8 +109,98 @@ const SponserIncoming ={
     `,
     data() {
         return {
-            logoutURL: window.location.origin + "/logout"
+            logoutURL: window.location.origin + "/logout",
+            requests: [], 
+            statusFilter: null
         };
     },
+    computed: {
+        filteredRequests() {
+            if (this.statusFilter === null) return this.requests;
+            return this.requests.filter(request => request.status === this.statusFilter);
+        }
+    },
+    methods: {
+        filterStatus(status) {
+            this.statusFilter = status;
+        },
+        getStatusText(status) {
+            const statusText = {
+                0: "Not Responded",
+                1: "Accepted",
+                2: "Rejected",
+                3: "Ad Closed",
+                4: "Campaign Banned",
+                5: "Influencer Banned",
+                6: "Sponser Banned"
+            };
+            return statusText[status] || "Unknown";
+        },
+        async loadRequests() {
+            try {
+                console.log("Fetching requests...");
+                const response = await fetch('/oeanalytics/request', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: store.state.user, role: 'spon', actions: 'actions' })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Requests fetched:", data); // Debugging line
+                    this.requests = data;
+                } else {
+                    console.error('Failed to load requests:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching requests:', error);
+            }
+        }
+,        
+        async acceptRequest(request) {
+            // Accept request and update status
+            try {
+                const response = await fetch(`/oeanalytics/payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ request: request}) // Accepting request
+                });
+                if (response.ok) {
+                    await this.loadRequests()
+                } else {
+                    console.error('Failed to accept request:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error accepting request:', error);
+            }
+        },
+        async rejectRequest(request) {
+            // Reject request and update status
+            try {
+                const response = await fetch(`/oeanalytics/request`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ request_id: request, status: 2 }) // Rejecting request
+                });
+                if (response.ok) {
+                    await this.loadRequests()
+                } else {
+                    console.error('Failed to reject request:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error rejecting request:', error);
+            }
+        }
+    },
+    mounted() {
+        this.loadRequests(); // Automatically load requests when the component is mounted
+    }
+
 }
 export default SponserIncoming;

@@ -1,3 +1,4 @@
+import store from "../utils/store.js";
 const AdminPayments = {
     template: `
     <div>
@@ -39,8 +40,42 @@ const AdminPayments = {
 
             <!-- Right Section for Detail Editing -->
             <div class="col-md-9">
-                <p>Payments<p>
+                <div class="container">
+                    <div class="row mt-4">
+                        <div class="col">
+                            <h1>Payments</h1>
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Influencer Email</th>
+                                        <th>Sponser Email</th>
+                                        <th>Campaign ID</th>
+                                        <th>Campaign Name</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="payment in payments" :key="payment.id">
+                                        <td>{{ payment.id }}</td>
+                                        <td>{{ payment.influencer_email }}</td>
+                                        <td>{{ payment.sponser_email }}</td>
+                                        <td>{{ payment.campaign_id }}</td>
+                                        <td>{{ payment.campaign_name }}</td>
+                                        <td>{{ payment.amount }}</td>
+                                        <td :class="getStatusClass(payment.status)">
+                                            {{ getStatusText(payment.status) }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+
         </div>
 
         <!-- Footer -->
@@ -55,6 +90,41 @@ const AdminPayments = {
             logoutURL: window.location.origin + "/logout"
         };
     },
+    data() {
+        return {
+            logoutURL: window.location.origin + "/logout",
+            payments: []
+        };
+    },
+    methods: {
+        async loadPayments() {
+            try {
+                const response = await fetch(`/oeanalytics/payment`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+                if (response.ok) {
+                    this.payments = await response.json();
+                } else {
+                    console.error('Failed to load payments:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error loading payments:', error);
+            }
+        },
+        getStatusText(status) {
+            return status === 0 ? 'Pending' : 'Accepted';
+        },
+        getStatusClass(status) {
+            return status === 0 ? 'status-pending' : 'status-accepted';
+        }
+    },
+    mounted() {
+        this.loadPayments();
+    }
+
 };
 
 export default AdminPayments;

@@ -416,3 +416,14 @@ html {
 .viewcard-body p {
     font-size: 17px;
 }
+
+.status-pending {
+    color: yellow;
+    font-weight: bold;
+}
+
+.status-accepted {
+    color: green;
+    font-weight: bold;
+}
+

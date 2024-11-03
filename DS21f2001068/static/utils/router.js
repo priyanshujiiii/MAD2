@@ -25,6 +25,7 @@ import InfluencerMyCampaign from "../pages/InfluencerMyCampaign.js";
 import InfluencerEditProfile from "../pages/InfluencerEditProfile.js";
 import InfluencerIncoming from "../pages/InfluencerIncoming.js";
 import InfluencerOutgoing from "../pages/InfluencerOutgoing.js";
+import InfluencerEditRequest from "../pages/InfluencerEditRequest.js";
 import InfluenecerPayments from "../pages/InfluenecerPayments.js";
 import SponserMyCampaign from "../pages/SponserMyCampaign.js";
 import SponserHire from "../pages/SponserHire.js";
@@ -65,6 +66,7 @@ const routes = [
   { path: "/oeanalytics/InfluencerDashboard/InfluencerEditProfile", component: InfluencerEditProfile },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerIncoming", component: InfluencerIncoming },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerOutgoing", component: InfluencerOutgoing },
+  { path: "/oeanalytics/InfluencerDashboard/InfluencerOutgoing/edit", component: InfluencerEditRequest },
   { path: "/oeanalytics/InfluencerDashboard/InfluenecerPayments", component: InfluenecerPayments },
   { path: "/oeanalytics/SponserDashboard", component: SponserDash },
   { path: "/oeanalytics/SponserDashboard/SponserMyCampaign", component: SponserMyCampaign },

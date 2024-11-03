@@ -66,7 +66,7 @@ const InfluencerSendRequest = {
                 payment_amount: "",
                 requirements: "",
                 messages: "",
-                role: "spon",
+                role: "influ",
                 category: ""          // To be fetched or prefilled if available
             }
         };

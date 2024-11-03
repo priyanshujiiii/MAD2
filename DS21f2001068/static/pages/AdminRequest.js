@@ -28,18 +28,63 @@ const AdminRequest = {
                     <router-link to="/oeanalytics/AdminDashboard/AdminAddCategory" class="list-group-item">Add Category</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminCategoryList" class="list-group-item">Category List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminInfluencerList" class="list-group-item">Influencer List</router-link>
-                    <router-link to="/oeanalytics/AdminDashboard/AdminSponserList" class="list-group-item">Sponser list</router-link>
-                    <router-link to="/oeanalytics/AdminDashboard/AdminCampaignList" class="list-group-item">Campaign list</router-link>
+                    <router-link to="/oeanalytics/AdminDashboard/AdminSponserList" class="list-group-item">Sponser List</router-link>
+                    <router-link to="/oeanalytics/AdminDashboard/AdminCampaignList" class="list-group-item">Campaign List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminRequest" class="list-group-item">Request</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
             <!-- Right Section for Detail Editing -->
             <div class="col-md-9">
-                <p>Request<p>
+                <h1>Requests</h1>
+                
+                <!-- Filters -->
+                <div class="filters mb-3">
+                    <input v-model="searchQuery" type="text" placeholder="Search by Influencer, Sponser, Campaign, or Role" class="form-control mb-2"/>
+                    <select v-model="statusFilter" @change="filterRequests" class="form-control mb-2">
+                        <option value="">All Statuses</option>
+                        <option value="0">Not Responded</option>
+                        <option value="1">Accepted</option>
+                        <option value="2">Rejected</option>
+                        <!-- Add more status options as needed -->
+                    </select>
+                </div>
+
+                <!-- Requests Table -->
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Influencer Email</th>
+                            <th>Sponser Email</th>
+                            <th>Campaign Id</th>
+                            <th>Campaign Name</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="request in filteredRequests" :key="request.request_id">
+                            <td>{{ request.request_id }}</td>
+                            <td>{{ request.influencer_email }}</td>
+                            <td>{{ request.sponser_email }}</td>
+                            <td>{{ request.campaign_id }}</td>
+                            <td>{{ request.campaign_name }}</td>
+                            <td>{{ request.role }}</td>
+                            <td>{{ getStatusText(request.status) }}</td>
+                            <td>
+                                <button 
+                                    class="btn btn-danger btn-sm" 
+                                    @click="deleteRequest(request.request_id)"
+                                >
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -47,14 +92,85 @@ const AdminRequest = {
         <div class="footer">
             <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
         </div>
-
     </div>
     `,
     data() {
         return {
-            logoutURL: window.location.origin + "/logout"
+            logoutURL: window.location.origin + "/logout",
+            requests: [], 
+            searchQuery: '',
+            statusFilter: ''
         };
     },
+    computed: {
+        filteredRequests() {
+            let result = this.requests;
+
+            // Filter by status if selected
+            if (this.statusFilter) {
+                result = result.filter(request => request.status.toString() === this.statusFilter);
+            }
+
+            // Filter by search query if entered
+            if (this.searchQuery) {
+                result = result.filter(request => 
+                    request.influencer_email.includes(this.searchQuery) ||
+                    request.sponser_email.includes(this.searchQuery) ||
+                    request.campaign_name.includes(this.searchQuery) ||
+                    request.role.includes(this.searchQuery)
+                );
+            }
+
+            return result;
+        }
+    },
+    methods: {
+        getStatusText(status) {
+            const statusText = {
+                0: "Not Responded",
+                1: "Accepted",
+                2: "Rejected"
+                // Add more status text mappings as needed
+            };
+            return statusText[status] || "Unknown";
+        },
+        async loadRequests() {
+            try {
+                const response = await fetch('/oeanalytics/request', { method: 'GET' });
+                if (response.ok) {
+                    this.requests = await response.json();
+                } else {
+                    console.error('Failed to load requests:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error fetching requests:', error);
+            }
+        },
+        async deleteRequest(request_id) {
+            try {
+                const response = await fetch('/oeanalytics/request', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ request_id })
+                });
+                if (response.ok) {
+                    this.requests = this.requests.filter(request => request.request_id !== request_id);
+                } else {
+                    console.error('Failed to delete request:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error deleting request:', error);
+            }
+        },
+        filterRequests() {
+            // This method is called on filter changes to recompute filteredRequests
+        }
+    },
+    mounted() {
+        this.loadRequests(); // Automatically load requests when the component is mounted
+    }
 };
 
 export default AdminRequest;

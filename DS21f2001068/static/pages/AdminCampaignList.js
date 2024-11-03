@@ -28,18 +28,54 @@ const AdminCampaignList = {
                     <router-link to="/oeanalytics/AdminDashboard/AdminAddCategory" class="list-group-item">Add Category</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminCategoryList" class="list-group-item">Category List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminInfluencerList" class="list-group-item">Influencer List</router-link>
-                    <router-link to="/oeanalytics/AdminDashboard/AdminSponserList" class="list-group-item">Sponser list</router-link>
-                    <router-link to="/oeanalytics/AdminDashboard/AdminCampaignList" class="list-group-item">Campaign list</router-link>
+                    <router-link to="/oeanalytics/AdminDashboard/AdminSponserList" class="list-group-item">Sponsor List</router-link>
+                    <router-link to="/oeanalytics/AdminDashboard/AdminCampaignList" class="list-group-item">Campaign List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminRequest" class="list-group-item">Request</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
-            <!-- Right Section for Detail Editing -->
+            <!-- Right Section for Campaign List Table -->
             <div class="col-md-9">
-                <p>campaign lists<p>
+                <h4>Campaign List</h4>
+                <input type="text" v-model="searchQuery" placeholder="Search campaigns..." class="form-control mb-3" />
+
+                <table class="table table-bordered mt-4">
+                    <thead>
+                        <tr>
+                            <th>Campaign ID</th>
+                            <th>Campaign Name</th>
+                            <th>Category</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Visibility</th>
+                            <th>Budget</th>
+                            <th>Alloted</th>
+                            <th>Payment</th>
+                            <th>Delete</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="campaign in filteredCampaigns" :key="campaign.campaignid">
+                            <td>{{ campaign.campaignid }}</td>
+                            <td>{{ campaign.campaignname }}</td>
+                            <td>{{ campaign.category }}</td>
+                            <td>{{ campaign.start_date }}</td>
+                            <td>{{ campaign.end_date }}</td>
+                            <td>{{ campaign.visibility }}</td>
+                            <td>{{ campaign.budget }}</td>
+                            <td>{{ campaign.alloted }}</td>
+                            <td>{{ campaign.payment }}</td>
+                            <td><button @click="deleteCampaign(campaign.campaignid)" class="btn btn-danger">Delete</button></td>
+                            <td>
+                                <button @click="toggleFlag(campaign.campaignid, campaign.flag)" class="btn btn-warning">
+                                    {{ campaign.flag === 0 ? 'Flag' : 'Unflag' }}
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -47,14 +83,85 @@ const AdminCampaignList = {
         <div class="footer">
             <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
         </div>
-
     </div>
     `,
     data() {
         return {
-            logoutURL: window.location.origin + "/logout"
+            logoutURL: window.location.origin + "/logout",
+            campaigns: [], // Array to hold campaign data
+            searchQuery: '' // String to hold the search query
         };
     },
+    created() {
+        // Fetch campaign data when component is created
+        this.fetchCampaigns();
+    },
+    computed: {
+        // Filter campaigns based on search query
+        filteredCampaigns() {
+            return this.campaigns.filter(campaign => {
+                return (
+                    campaign.campaignname.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                    campaign.category.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                    campaign.goals.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                    campaign.email.toLowerCase().includes(this.searchQuery.toLowerCase())
+                );
+            });
+        }
+    },
+    methods: {
+        // Fetch all campaigns
+        fetchCampaigns() {
+            fetch('/oeanalytics/campaign', { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    this.campaigns = data;
+                })
+                .catch(error => console.error('Error fetching campaigns:', error));
+        },
+
+        // Delete a campaign
+        deleteCampaign(campaignid) {
+            fetch('/oeanalytics/campaign', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ campaign_id: campaignid })
+            })
+            .then(response => {
+                if (response.ok) {
+                    this.campaigns = this.campaigns.filter(campaign => campaign.campaignid !== campaignid);
+                } else {
+                    console.error('Error deleting campaign');
+                }
+            });
+        },
+
+        // Toggle flag status of a campaign
+        toggleFlag(campaignid, currentFlag) {
+            const newFlag = currentFlag === 0 ? 1 : 0;
+            fetch('/oeanalytics/campaign', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ campaign_id: campaignid, flag: newFlag })
+            })
+            .then(response => {
+                if (response.ok) {
+                    this.campaigns = this.campaigns.map(campaign => {
+                        if (campaign.campaignid === campaignid) {
+                            return { ...campaign, flag: newFlag };
+                        }
+                        return campaign;
+                    });
+                } else {
+                    console.error('Error updating flag status');
+                }
+            });
+        }
+    }
 };
 
 export default AdminCampaignList;

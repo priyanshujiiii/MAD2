@@ -246,28 +246,27 @@ app.config['SECURITY_CSRF_IGNORE_UNAUTH_ENDPOINTS'] = True
 
 @app.route('/signin', methods=['POST'])
 def signin():
-    print('test.0')
+
     data = request.get_json()
-    print('data:', data)  # Debug the data object here
+    # Debug the data object here
     if not data:
         return jsonify({'message': 'Invalid JSON'}), 400
 
     email = data.get('email')
     password = data.get('password')
-    print('test.1', 'email:', email, 'password:', password)  # Log credentials for debugging (in real production, avoid logging passwords)
-
+    
     if not email or not password:
         return jsonify({'message': 'email or password not provided'}), 400
 
     user = user_datastore.find_user(email=email)
-    print('test.2', 'user:', user)  # Verify the user lookup
+   
 
     if not user:
         return jsonify({'message': 'invalid user'}), 400
 
     if verify_password(password, user.password):
         token = user.get_auth_token()
-        print('token:', token)  # Log the generated token for verification
+        
         return jsonify({'token': token, 'user': user.email, 'role': user.roles[0].name}), 200
     else:
         return jsonify({'message': 'invalid password'}), 400
@@ -668,13 +667,17 @@ class PaymentAPI(Resource):
     @marshal_with(payment_fields)
     def post(self):
         data = request.get_json()
+        request_id = data.get('request')
+        r = Request.query.filter_by(request_id=request_id).first()
+        r.status = 1
+
         new_payment = Payment(
-            influencer_email=data['influencer_email'],
-            sponser_email=data['sponser_email'],
-            campaign_id=data['campaign_id'],
-            amount=data['amount'],
-            status=data['status'],
-            campaign_name=data['campaign_name']
+            influencer_email=r.influencer_email,
+            sponser_email=r.sponser_email,
+            campaign_id=r.campaign_id,
+            amount=r.payment_amount,
+            status=0,
+            campaign_name=r.campaign_name
         )
         db.session.add(new_payment)
         db.session.commit()
@@ -683,15 +686,21 @@ class PaymentAPI(Resource):
     @marshal_with(payment_fields)
     def patch(self):
         data = request.get_json()
-        payment = Payment.query.get(data['id'])
+        payment_id = data.get('id')
+        
+        # Find the payment entry by id
+        payment = Payment.query.filter_by(id=payment_id).first()
+
         if not payment:
             return {'message': 'Payment not found'}, 404
 
-        for key, value in data.items():
-            setattr(payment, key, value)
+        # Set the status to 1
+        payment.status = 1
 
+        # Commit the change to the database
         db.session.commit()
         return payment, 200
+
 
     def delete(self):
         data = request.get_json()
@@ -702,6 +711,18 @@ class PaymentAPI(Resource):
         db.session.delete(payment)
         db.session.commit()
         return {'message': 'Payment deleted'}, 200
+    
+    @marshal_with(payment_fields)
+    def put(self):
+        data = request.get_json()
+        email = data.get('email')
+        role = data.get('role')
+        if role == 'spon':
+            payment = Payment.query.filter_by(sponser_email=email).all()
+            return payment,200
+        if role == 'influ':
+            payment = Payment.query.filter_by(influencer_email=email).all()
+            return payment,200
 
 class RequestAPI(Resource):
     @marshal_with(request_fields)
@@ -735,13 +756,14 @@ class RequestAPI(Resource):
     @marshal_with(request_fields)
     def patch(self):
         data = request.get_json()
-        request_id = data.get('request_id')
+        request_id = data.get('id')
         request_record = Request.query.filter_by(request_id=request_id).first()
+        print(request_id)
         if not request_record:
             return {'message': 'Request not found'}, 404
 
         for key, value in data.items():
-            if  key != 'request_id':
+            if  key != 'id':
                 setattr(request_record, key, value)
 
         db.session.commit()
@@ -764,13 +786,25 @@ class RequestAPI(Resource):
         role = data.get('role')
         request_id = data.get('id')
         campaign_id = data.get('campaign_id')
+        actions = data.get('actions')
 
         requests = []
         
         if role == 'spon':
-            requests = Request.query.filter_by(sponser_email=email, role=role).all()
+            if actions:
+                requests = Request.query.filter_by(sponser_email=email, role='influ').all()
+                return requests, 200
+            else:
+                requests = Request.query.filter_by(sponser_email=email, role=role).all()
+                return requests, 200
         elif role == 'influ':
-            requests = Request.query.filter_by(influencer_email=email, role=role).all()
+            if actions:
+                requests = Request.query.filter_by(influencer_email=email, role='spon').all()
+                return requests, 200
+            else: 
+                requests = Request.query.filter_by(influencer_email=email, role=role).all()
+            
+                return requests, 200
         if request_id:
             request_record = Request.query.filter_by(request_id=request_id).first()
             if request_record:
