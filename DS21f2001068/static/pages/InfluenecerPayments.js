@@ -12,10 +12,10 @@ const InfluenecerPayments ={
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a :href="logoutURL" class="nav-link">Logout</a>
+                        <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
+                        <a :href="logoutURL" class="nav-link">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -27,7 +27,6 @@ const InfluenecerPayments ={
                 <h3 class="mt-4 mb-4 text-center">Influencer Dashboard</h3>
                 <ul class="list-group">
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerMyCampaign" class="list-group-item">My Campaign</router-link>
-                    <router-link to="/oeanalytics/InfluencerDashboard/InfluencerEditProfile" class="list-group-item">Edit Profile</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluenecerPayments" class="list-group-item">Payments</router-link>
@@ -100,8 +99,8 @@ const InfluenecerPayments ={
                 const response = await fetch(`/oeanalytics/payment`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
+                        "Authentication-Token": sessionStorage.getItem("token"),"Content-Type": "application/json",
+                      },
                     body: JSON.stringify({ email: store.state.user,role:'influ' })
                 });
                 if (response.ok) {

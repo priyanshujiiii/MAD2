@@ -102,10 +102,13 @@ const SponserPayments ={
         async loadPayments() {
             try {
                 const response = await fetch(`/oeanalytics/payment`, {
-                    method: 'GET',
+                    method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        'Content-Type': 'application/json',
                     },
+                    
+                    body: JSON.stringify({ email: store.state.user,role:'spon' }),
                 });
                 if (response.ok) {
                     this.payments = await response.json();
@@ -127,8 +130,9 @@ const SponserPayments ={
                 const response = await fetch(`/oeanalytics/payment`, {
                     method: 'PATCH',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        'Content-Type': 'application/json',
+                      },
                     body: JSON.stringify({ id: paymentId,status:1 })
                 });
                 if (response.ok) {

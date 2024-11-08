@@ -83,8 +83,9 @@ const SponserEditRequest = {
             fetch(`/oeanalytics/request`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
+                  },
                 body: JSON.stringify({ id: this.$route.query.request_id })
             })
             .then(response => {
@@ -92,6 +93,7 @@ const SponserEditRequest = {
                 return response.json();
             })
             .then(data => {
+                this.form = data[0]
                 // Populate form fields with fetched data
                 this.form.requirements = data.requirements || "";
                 this.form.messages = data.messages || "";
@@ -104,8 +106,9 @@ const SponserEditRequest = {
             fetch(`/oeanalytics/request`, {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
+                  },
                 body: JSON.stringify({
                     id: this.$route.query.request_id,
                     requirements: this.form.requirements,

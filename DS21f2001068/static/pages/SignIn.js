@@ -1,4 +1,5 @@
 import store from "../utils/store.js";
+
 const SignIn = {
   template: `
   <div style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
@@ -29,6 +30,9 @@ const SignIn = {
     <div class="signin-card">
       <form @submit.prevent="signIn">
           <h2 class="text-center">Sign In</h2>
+          <div v-if="errorMessage" class="alert alert-danger">
+              {{ errorMessage }}
+          </div>
           <div class="form-group">
               <label for="username">Email</label>
               <input v-model="email" type="text" class="form-control" id="email" name="email" required>
@@ -37,7 +41,7 @@ const SignIn = {
               <label for="password">Password</label>
               <input v-model="password" type="password" class="form-control" id="password" name="password" required>
           </div>
-          <button type="submit" class="btn-submit" :disabled="!isFormValid" @click="submitInfo">Sign In</button>
+          <button type="submit" class="btn-submit" :disabled="!isFormValid">Sign In</button>
       </form>
     </div>
 
@@ -51,7 +55,7 @@ const SignIn = {
       return {
           email: '',
           password: '',
-          logoutURL: window.location.origin + "/logout"
+          errorMessage: '', // Data property for storing error message
       };
   },
   computed: {
@@ -60,41 +64,44 @@ const SignIn = {
       }
   },
   methods: {
-    async submitInfo() {
-      const url = window.location.origin;
-      const res = await fetch(url + "/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: this.email, password: this.password}),
-      });
+    async signIn() {
+      const url = window.location.origin + "/signin";
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: this.email, password: this.password }),
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        const { role, token, user } = data;
-        store.commit('setRole', role);
-        store.commit('setAuthToken', token);
-        store.commit('setUser', user);
-        console.log(data)
-        console.log('Role:', store.state.role);       
-        console.log('Token:', store.state.authToken); 
-        console.log('User:', store.state.user);
-        localStorage.setItem("token", token);
-        localStorage.setItem("email",user);
-        localStorage.setItem("role", role);
-        // set role also
-      if(data.role=='admin'){
-        this.$router.push("/oeanalytics/AdminHome")
-      }
-      if(data.role=='spon'){
-        this.$router.push("/oeanalytics/SponserHome")
-      }
-      if(data.role=='influ'){
-        this.$router.push("/oeanalytics/InfluencerHome")
-      } // add logic for inst-dash vs stud
-      } else {
-        console.error("Login Failed");
+        if (res.ok) {
+          const data = await res.json();
+          const { role, token, user } = data;
+          store.commit('setRole', role);
+          store.commit('setAuthToken', token);
+          store.commit('setUser', user);
+          sessionStorage.setItem("token", token);
+          sessionStorage.setItem("email", user);
+          sessionStorage.setItem("role", role);
+          localStorage.setItem("token", token);
+          localStorage.setItem("email", user);
+          localStorage.setItem("role", role);
+          
+          if (role === 'admin') {
+            this.$router.push("/oeanalytics/AdminHome");
+          } else if (role === 'spon') {
+            this.$router.push("/oeanalytics/SponserHome");
+          } else if (role === 'influ') {
+            this.$router.push("/oeanalytics/InfluencerHome");
+          }
+        } else {
+          const errorData = await res.json();
+          this.errorMessage = errorData.message || "Login failed. Please try again.";
+        }
+      } catch (error) {
+        console.error("Login Failed", error);
+        this.errorMessage = "An error occurred. Please try again later.";
       }
     },
   },

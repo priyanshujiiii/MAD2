@@ -15,13 +15,8 @@ const InfluencerExplore = {
           </button>
           <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-              <!-- Sign Up Dropdown -->
               <li class="nav-item">
-                <router-link to="/oeanalytics/signup" class="nav-link">Sign Up</router-link>
-              </li>
-              <!-- Sign In and Features Links -->
-              <li class="nav-item">
-                <router-link to="/oeanalytics/signin" class="nav-link">Sign In</router-link>
+                <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
               </li>
               <li class="nav-item">
               <a :href="logoutURL" class="nav-link">Logout</a>
@@ -71,6 +66,10 @@ const InfluencerExplore = {
         try {
           const response = await fetch('/oeanalytics/categories', {
             method: 'PUT',
+            headers: {
+              "Authentication-Token": sessionStorage.getItem("token"),
+              "Content-Type": "application/json",
+            },
             body:{}
           });
           if (response.ok) {

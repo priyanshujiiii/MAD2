@@ -102,8 +102,8 @@ const AdminPayments = {
                 const response = await fetch(`/oeanalytics/payment`, {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                      },
                 });
                 if (response.ok) {
                     this.payments = await response.json();

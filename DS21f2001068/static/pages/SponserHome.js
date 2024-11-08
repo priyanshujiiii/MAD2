@@ -11,12 +11,14 @@ const SponserHome = {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-              <router-link to="/oeanalytics/SponserHome/profile" class="nav-link">Profile</router-link>
+            <!-- Only show these buttons if sponsor is not banned and alloted is 1 -->
+            <li class="nav-item" v-if="!isBanned && isAlloted">
+              <router-link to="/oeanalytics/SponserDashboard/EditProfile" class="nav-link">Edit Profile</router-link>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="!isBanned && isAlloted">
               <router-link to="/oeanalytics/SponserDashboard" class="nav-link">Dashboard</router-link>
             </li>
+            <!-- Always show the Logout button -->
             <li class="nav-item">
               <a :href="logoutURL" class="nav-link">Logout</a>
             </li>
@@ -24,7 +26,22 @@ const SponserHome = {
         </div>
       </nav>
 
-      <div class="carddd">
+      <!-- Show warning if sponsor is banned -->
+      <div class="container" v-if="isBanned">
+        <div class="alert alert-warning text-center" role="alert">
+          <h3>Your account is banned. Please contact support.</h3>
+        </div>
+      </div>
+
+      <!-- Show verification pending message if alloted is 0 -->
+      <div class="container" v-if="!isAlloted && !isBanned">
+        <div class="alert alert-info text-center" role="alert">
+          <h3>Your account verification is pending.</h3>
+        </div>
+      </div>
+
+      <!-- Profile Details Card, shown only if not banned and alloted is 1 -->
+      <div class="carddd" v-if="!isBanned && isAlloted">
         <h1>Profile Details</h1>
         <div class="details-table">
           <table class="table table-bordered">
@@ -94,7 +111,9 @@ const SponserHome = {
   data() {
     return {
       profileFields: [],
-      logoutURL: window.location.origin + "/logout"
+      logoutURL: window.location.origin + "/logout",
+      isBanned: false, // To track if the sponsor is banned
+      isAlloted: true  // To track if the account is alloted (verified)
     };
   },
 
@@ -104,17 +123,24 @@ const SponserHome = {
         const response = await fetch('/oeanalytics/sponsor', {
           method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Authentication-Token": sessionStorage.getItem("token"),
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ email: store.state.user }),
         });
-    
+
         if (response.ok) {
           const data = await response.json();
-          
+
           // Since the response is an array, access the first item
           if (Array.isArray(data) && data.length > 0) {
             this.profileFields = data[0];  // Use the first item in the array
+
+            // Check if the sponsor is banned (flag == 1)
+            this.isBanned = this.profileFields.flag === 1;
+
+            // Check if the sponsor is alloted (account verified)
+            this.isAlloted = this.profileFields.approval === 1;
           } else {
             console.error("Unexpected response format:", data);
           }
@@ -127,7 +153,6 @@ const SponserHome = {
         // You may want to show a user-friendly message or log the error
       }
     }
-    
   },
 
   // Call fetchSponser method when the component is mounted

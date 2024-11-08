@@ -106,7 +106,7 @@ const AddCategory = {
             fetch('/oeanalytics/categories', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Authentication-Token": sessionStorage.getItem("token"),
                 },
                 body: JSON.stringify(payload)
             })

@@ -89,8 +89,8 @@ const AdminEditCategory = {
             fetch('/oeanalytics/categories', {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json',
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
                 body: JSON.stringify({
                     category: this.$route.query.category,
                     description: this.description

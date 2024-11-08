@@ -12,10 +12,10 @@ const InfluencerOutgoing ={
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a :href="logoutURL" class="nav-link">Logout</a>
+                        <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
+                        <a :href="logoutURL" class="nav-link">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -27,7 +27,6 @@ const InfluencerOutgoing ={
                 <h3 class="mt-4 mb-4 text-center">Influencer Dashboard</h3>
                 <ul class="list-group">
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerMyCampaign" class="list-group-item">My Campaign</router-link>
-                    <router-link to="/oeanalytics/InfluencerDashboard/InfluencerEditProfile" class="list-group-item">Edit Profile</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluenecerPayments" class="list-group-item">Payments</router-link>
@@ -63,7 +62,9 @@ const InfluencerOutgoing ={
                                 </thead>
                                 <tbody>
                                     <tr v-for="request in filteredRequests" :key="request.request_id">
-                                        <td>{{ request.request_id }}</td>
+                                        <td @click="navigateToRequest(request.request_id)" style="cursor: pointer; color: blue; text-decoration: underline;">
+                                            {{ request.request_id }}
+                                        </td>
                                         <td>{{ request.sponser_email }}</td>
                                         <td>{{ request.campaign_id }}</td>
                                         <td>{{ request.campaign_name }}</td>
@@ -128,7 +129,10 @@ const InfluencerOutgoing ={
             try {
                 const response = await fetch("/oeanalytics/request", {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        "Content-Type": "application/json",
+                      },
                     body: JSON.stringify({ role: "influ", email: store.state.user })
                 });
                 const data = await response.json();
@@ -141,7 +145,10 @@ const InfluencerOutgoing ={
             try {
                 const response = await fetch("/oeanalytics/request", {
                     method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        "Content-Type": "application/json",
+                      },
                     body: JSON.stringify({ request_id })
                 });
                 const result = await response.json();
@@ -168,7 +175,15 @@ const InfluencerOutgoing ={
                 6: "Sponser Banned"
             };
             return statusText[status] || "Unknown";
+        },
+        navigateToRequest(requestId) {
+            this.$router.push({ 
+                path: '/oeanalytics/InfluencerDashboard/InfluencerRequestView', 
+                query: { id: requestId } 
+            });
         }
+        
+        
     },
     mounted() {
         this.fetchData();

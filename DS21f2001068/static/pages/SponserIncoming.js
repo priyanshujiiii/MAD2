@@ -54,7 +54,7 @@ const SponserIncoming ={
                                 <thead>
                                     <tr>
                                         <th>Request</th>
-                                        <th>Sponser Email</th>
+                                        <th>Influencer Email</th>
                                         <th>Campaign ID</th>
                                         <th>Campaign Name</th>
                                         <th>Payment Amount</th>
@@ -65,7 +65,7 @@ const SponserIncoming ={
                                 <tbody>
                                     <tr v-for="request in filteredRequests" :key="request.request_id">
                                         <td>{{ request.request_id }}</td>
-                                        <td>{{ request.sponser_email }}</td>
+                                        <td>{{ request.influencer_email }}</td>
                                         <td>{{ request.campaign_id }}</td>
                                         <td>{{ request.campaign_name }}</td>
                                         <td>{{ request.payment_amount }}</td>
@@ -141,9 +141,11 @@ const SponserIncoming ={
                 console.log("Fetching requests...");
                 const response = await fetch('/oeanalytics/request', {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    
+                   headers: {
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        'Content-Type': 'application/json',
+                      },
                     body: JSON.stringify({ email: store.state.user, role: 'spon', actions: 'actions' })
                 });
                 
@@ -165,8 +167,9 @@ const SponserIncoming ={
                 const response = await fetch(`/oeanalytics/payment`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        'Content-Type': 'application/json',
+                      },
                     body: JSON.stringify({ request: request}) // Accepting request
                 });
                 if (response.ok) {
@@ -184,8 +187,9 @@ const SponserIncoming ={
                 const response = await fetch(`/oeanalytics/request`, {
                     method: 'PATCH',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        'Content-Type': 'application/json',
+                      },
                     body: JSON.stringify({ request_id: request, status: 2 }) // Rejecting request
                 });
                 if (response.ok) {

@@ -91,7 +91,10 @@ const AdminCategoryList = {
     methods: {
         fetchCategories() {
             fetch("/oeanalytics/categories", {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
             })
             .then(response => response.json())
             .then(data => {
@@ -113,8 +116,8 @@ const AdminCategoryList = {
             fetch('/oeanalytics/categories', {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
                 body: JSON.stringify({ category: item.category }), // Send the category name
             })
             .then(response => {

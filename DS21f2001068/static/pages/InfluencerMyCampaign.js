@@ -1,5 +1,5 @@
-const InfluencerMyCampaign ={
-    
+import store from "../utils/store.js";
+const InfluencerMyCampaign = {
     template: `
     <div>
         <!-- Navigation Bar -->
@@ -11,10 +11,10 @@ const InfluencerMyCampaign ={
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a :href="logoutURL" class="nav-link">Logout</a>
+                        <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
+                        <a :href="logoutURL" class="nav-link">Logout</a>
                     </li>
                 </ul>
             </div>
@@ -26,23 +26,52 @@ const InfluencerMyCampaign ={
                 <h3 class="mt-4 mb-4 text-center">Influencer Dashboard</h3>
                 <ul class="list-group">
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerMyCampaign" class="list-group-item">My Campaign</router-link>
-                    <router-link to="/oeanalytics/InfluencerDashboard/InfluencerEditProfile" class="list-group-item">Edit Profile</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluenecerPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
-            <!-- Right Section for Detail Editing -->
+            <!-- Right Section for Campaign Details -->
             <div class="col-md-9">
                 <div class="container">
                     <div class="row mt-4">
                         <div class="col">
-                            <h1>
-                                InfluencerMyCampaign
-                            </h1>
+                            <h1>My Campaigns</h1>
+
+                            <!-- Campaign Table -->
+                            <table class="table table-bordered">
+                                <thead >
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Email</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Visibility</th>
+                                        <th>Budget</th>
+                                        <th>Alloted</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="campaign in campaigns" :key="campaign.campaignid">
+                                        <td>{{ campaign.campaignid }}</td>
+                                        <td>{{ campaign.campaignname }}</td>
+                                        <td>{{ campaign.category }}</td>
+                                        <td>{{ campaign.email }}</td>
+                                        <td>{{ campaign.start_date }}</td>
+                                        <td>{{ campaign.end_date }}</td>
+                                        <td>{{ campaign.visibility }}</td>
+                                        <td>{{ campaign.budget }}</td>
+                                        <td>{{ campaign.alloted }}</td>
+                                        <td>{{ campaign.payment }}</td>
+                                        <td><button @click="viewCampaign(campaign.campaignid)" class="btn btn-primary btn-sm">View</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -57,9 +86,36 @@ const InfluencerMyCampaign ={
     `,
     data() {
         return {
+            campaigns: [],  // Store fetched campaign data here
             logoutURL: window.location.origin + "/logout"
         };
     },
-
+    mounted() {
+        this.fetchCampaigns();
+    },
+    methods: {
+        fetchCampaigns() {
+            
+            fetch(`/oeanalytics/campaign`, {
+                method: 'PUT',
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
+                  },
+                body: JSON.stringify({ email:store.state.user,role:'influ' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.campaigns = data;  // Assume data is an array of campaign objects
+            })
+            .catch(error => console.error('Error fetching campaigns:', error));
+        },
+        viewCampaign(campaign) {
+            this.$router.push({ 
+                path: '/oeanalytics/InfluencerDashboard/InfluencerMyCampaign/id', 
+                query: { id:campaign } 
+            });
+        }
+    }
 }
 export default InfluencerMyCampaign;

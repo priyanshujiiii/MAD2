@@ -1,8 +1,8 @@
 import store from "../utils/store.js";
-// NavBar component
+
 const InfluencerHome = {
   template: `
-    <div>
+    <div class="influencer-home">
       <!-- Navigation Bar -->
       <nav class="navbar navbar-expand-lg navbar-dark">
         <a class="navbar-brand" href="#">Open Eye Analytics</a>
@@ -11,113 +11,52 @@ const InfluencerHome = {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-              <router-link to="/oeanalytics/InfluencerDashboard/Explore" class="nav-link">Active Campaigns</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/oeanalytics/InfluencerHome/profile" class="nav-link">Profile</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
-            </li>
+            <!-- Logout button always visible -->
             <li class="nav-item">
               <a :href="logoutURL" class="nav-link">Logout</a>
+            </li>
+            <!-- Other buttons hidden if account is banned -->
+            <li class="nav-item" v-if="!isBanned">
+              <router-link to="/oeanalytics/InfluencerDashboard/Explore" class="nav-link">Active Campaigns</router-link>
+            </li>
+            <li class="nav-item" v-if="!isBanned">
+              <router-link to="/oeanalytics/InfluencerDashboard/InfluencerEditProfile" class="nav-link">Edit Profile</router-link>
+            </li>
+            <li class="nav-item" v-if="!isBanned">
+              <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
             </li>
           </ul>
         </div>
       </nav>
-      
-      <!-- Profile Details -->
-      <div class="carddd">
-        <h1>Profile Details</h1>
-        <div class="details-table">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th style="font-size: 17px;">Field</th>
-                <th style="font-size: 17px;">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Email</td>
-                <td>{{ profileFields.email }}</td>
-              </tr>
-              <tr>
-                <td>First Name</td>
-                <td>{{ profileFields.first_name }}</td>
-              </tr>
-              <tr>
-                <td>Last Name</td>
-                <td>{{ profileFields.last_name }}</td>
-              </tr>
-              <tr>
-                <td>Bio</td>
-                <td>{{ profileFields.bio }}</td>
-              </tr>
-              <tr>
-                <td>Address</td>
-                <td>{{ profileFields.address }}</td>
-              </tr>
-              <tr>
-                <td>District</td>
-                <td>{{ profileFields.district }}</td>
-              </tr>
-              <tr>
-                <td>State</td>
-                <td>{{ profileFields.state }}</td>
-              </tr>
-              <tr>
-                <td>Pincode</td>
-                <td>{{ profileFields.pincode }}</td>
-              </tr>
-              <tr>
-                <td>Contact</td>
-                <td>{{ profileFields.contact }}</td>
-              </tr>
-              <tr>
-                <td>Instagram ID</td>
-                <td>{{ profileFields.instagram_id }}</td>
-              </tr>
-              <tr>
-                <td>LinkedIn ID</td>
-                <td>{{ profileFields.linkedin_id }}</td>
-              </tr>
-              <tr>
-                <td>Facebook ID</td>
-                <td>{{ profileFields.facebook_id }}</td>
-              </tr>
-              <tr>
-                <td>X ID</td>
-                <td>{{ profileFields.x_id }}</td>
-              </tr>
-              <tr>
-                <td>Category</td>
-                <td>{{ profileFields.category }}</td>
-              </tr>
-              <tr>
-                <td>Instagram Followers</td>
-                <td>{{ profileFields.insta_f }}</td>
-              </tr>
-              <tr>
-                <td>LinkedIn Followers</td>
-                <td>{{ profileFields.linkedin_f }}</td>
-              </tr>
-              <tr>
-                <td>Facebook Followers</td>
-                <td>{{ profileFields.facebook_f }}</td>
-              </tr>
-              <tr>
-                <td>X Followers</td>
-                <td>{{ profileFields.x_f }}</td>
-              </tr>
-            </tbody>
-          </table>
+
+      <!-- Profile Details Card -->
+      <div class="profile-card container my-5" v-if="!isBanned">
+        <div class="card shadow-sm p-4">
+          <h2 class="text-center mb-4">Profile Details</h2>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="profile-field" v-for="(label, index) in firstColumnLabels" :key="index">
+                <strong>{{ label }}</strong>: {{ firstColumnFields[index] || 'Not Provided' }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="profile-field" v-for="(label, index) in secondColumnLabels" :key="index">
+                <strong>{{ label }}</strong>: {{ secondColumnFields[index] || 'Not Provided' }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning Message when Banned -->
+      <div class="container my-5" v-if="isBanned">
+        <div class="alert alert-warning text-center" role="alert">
+          <h3>Your account is banned. Please contact support.</h3>
         </div>
       </div>
 
       <!-- Footer -->
-      <div class="footer">
+      <div class="footer mt-5 text-center">
         <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
       </div>
     </div>
@@ -125,8 +64,13 @@ const InfluencerHome = {
   
   data() {
     return {
-      profileFields: {},  // Use an object for holding user details
-      logoutURL: `${window.location.origin}/logout`
+      profileFields: {},
+      logoutURL: `${window.location.origin}/logout`,
+      firstColumnLabels: ['Email', 'First Name', 'Last Name', 'Bio', 'Address', 'District', 'State', 'Pincode', 'Contact'],
+      secondColumnLabels: ['Instagram ID', 'LinkedIn ID', 'Facebook ID', 'X ID', 'Category', 'Instagram Followers', 'LinkedIn Followers', 'Facebook Followers', 'X Followers'],
+      firstColumnFields: [],
+      secondColumnFields: [],
+      isBanned: false // To track if the influencer is banned
     };
   },
 
@@ -136,22 +80,38 @@ const InfluencerHome = {
         const response = await fetch('/oeanalytics/influencer', {
           method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Authentication-Token": sessionStorage.getItem("token"),
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ email: store.state.user }),
         });
     
         if (response.ok) {
           const data = await response.json();
-          
-          // Check if the response is an array and access the first item
           if (Array.isArray(data) && data.length > 0) {
-            this.profileFields = data[0];  // Use the first item in the array
+            this.profileFields = data[0];
+
+            // Check if the influencer is banned
+            this.isBanned = this.profileFields.flag === 1;
+
+            // Assign values to the fields arrays based on profile data if not banned
+            if (!this.isBanned) {
+              this.firstColumnFields = [
+                this.profileFields.email, this.profileFields.first_name, this.profileFields.last_name,
+                this.profileFields.bio, this.profileFields.address, this.profileFields.district,
+                this.profileFields.state, this.profileFields.pincode, this.profileFields.contact
+              ];
+
+              this.secondColumnFields = [
+                this.profileFields.instagram_id, this.profileFields.linkedin_id, this.profileFields.facebook_id,
+                this.profileFields.x_id, this.profileFields.category, this.profileFields.insta_f,
+                this.profileFields.linkedin_f, this.profileFields.facebook_f, this.profileFields.x_f
+              ];
+            }
           } else {
             console.error("Unexpected response format:", data);
           }
         } else {
-          // Redirect to profile creation if the influencer does not exist
           this.$router.push("/oeanalytics/InfluencerHome/MakeProfile");
         }
       } catch (error) {
@@ -161,7 +121,6 @@ const InfluencerHome = {
     }
   },
 
-  // Call fetchInfluencer method when the component is mounted
   mounted() {
     this.fetchInfluencer();
   }

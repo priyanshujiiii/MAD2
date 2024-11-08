@@ -136,7 +136,12 @@ const AdminRequest = {
         },
         async loadRequests() {
             try {
-                const response = await fetch('/oeanalytics/request', { method: 'GET' });
+                const response = await fetch('/oeanalytics/request', { 
+                    method: 'GET',
+                    headers: {
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                      },
+                 });
                 if (response.ok) {
                     this.requests = await response.json();
                 } else {
@@ -151,8 +156,8 @@ const AdminRequest = {
                 const response = await fetch('/oeanalytics/request', {
                     method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                      },
                     body: JSON.stringify({ request_id })
                 });
                 if (response.ok) {

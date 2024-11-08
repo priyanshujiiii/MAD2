@@ -81,7 +81,8 @@ const InfluencerViewCampaign = {
           const response = await fetch('/oeanalytics/campaign', {
             method: 'PUT',
             headers: {
-              'Content-Type': 'application/json',
+              "Authentication-Token": sessionStorage.getItem("token"),
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ category: this.category })
           });
@@ -113,7 +114,8 @@ const InfluencerViewCampaign = {
           const response = await fetch('/oeanalytics/request', {
             method: 'PUT',
             headers: {
-              'Content-Type': 'application/json',
+              "Authentication-Token": sessionStorage.getItem("token"),
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ campaign_id: campaignId, influencer_email: store.state.user })
           });

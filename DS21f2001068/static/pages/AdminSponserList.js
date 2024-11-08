@@ -38,7 +38,7 @@ const AdminSponserList = {
             <!-- Right Section for Sponsor List -->
             <div class="col-md-9">
                 <h4>Sponsor List</h4>
-                <input type="text" v-model="searchQuery" placeholder="Search sponsors..." class="form-control mb-3" />
+                <input type="text" v-model="searchQuery" placeholder="Search sponsors..." class="form-control mb-3"  />
 
                 <table class="table table-bordered mt-4">
                     <thead>
@@ -54,8 +54,8 @@ const AdminSponserList = {
                             <th>District</th>
                             <th>State</th>
                             <th>Pincode</th>
-                            <th>Wallet</th>
                             <th>Flag</th>
+                            <th>Approval</th>
                             <th>Delete</th>
                         </tr>
                     </thead>
@@ -72,8 +72,30 @@ const AdminSponserList = {
                             <td>{{ sponser.district }}</td>
                             <td>{{ sponser.state }}</td>
                             <td>{{ sponser.pincode }}</td>
-                            <td>{{ sponser.wallet }}</td>
-                            <td>{{ sponser.flag }}</td>
+                            <td>
+                                <button
+                                    @click="toggleFlag(sponser)"
+                                    :class="sponser.flag === 0 ? 'btn btn-success' : 'btn btn-warning'"
+                                >
+                                    {{ sponser.flag === 0 ? 'Flag' : 'Unflag' }}
+                                </button>
+                            </td>
+                            <td>
+                                <button
+                                    v-if="sponser.approval === 0"
+                                    @click="approveSponser(sponser.email)"
+                                    class="btn btn-primary"
+                                >
+                                    Approve
+                                </button>
+                                <button
+                                    v-if="sponser.approval === 1"
+                                    disabled
+                                    class="btn btn-success"
+                                >
+                                    Approved
+                                </button>
+                            </td>
                             <td><button @click="deleteSponser(sponser.email)" class="btn btn-danger">Delete</button></td>
                         </tr>
                     </tbody>
@@ -114,7 +136,12 @@ const AdminSponserList = {
     methods: {
         // Fetch all sponsers
         fetchSponsers() {
-            fetch('/oeanalytics/sponsor', { method: 'GET' })
+            fetch('/oeanalytics/sponsor', { 
+                method: 'GET',
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
+             })
                 .then(response => response.json())
                 .then(data => {
                     this.sponsers = data;
@@ -122,13 +149,52 @@ const AdminSponserList = {
                 .catch(error => console.error('Error fetching sponsers:', error));
         },
 
+        // Toggle flag status
+        toggleFlag(sponser) {
+            const newFlagStatus = sponser.flag === 0 ? 1 : 0;
+            fetch('/oeanalytics/sponsor', {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
+                body: JSON.stringify({ email: sponser.email, flag: newFlagStatus })
+            })
+            .then(response => {
+                if (response.ok) {
+                    sponser.flag = newFlagStatus;
+                } else {
+                    console.error('Error updating flag status');
+                }
+            });
+        },
+
+        // Approve sponsor
+        approveSponser(email) {
+            fetch('/oeanalytics/sponsor', {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
+                body: JSON.stringify({ email: email, approval: 1 })
+            })
+            .then(response => {
+                if (response.ok) {
+                    sponser.approval = 1;
+                } else {
+                    console.error('Error approving sponsor');
+                }
+            });
+        },
+
         // Delete a sponser
         deleteSponser(email) {
             fetch('/oeanalytics/sponsor', {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
                 body: JSON.stringify({ email })
             })
             .then(response => {

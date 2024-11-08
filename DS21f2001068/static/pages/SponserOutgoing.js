@@ -126,7 +126,11 @@ const SponserOutgoing = {
             try {
                 const response = await fetch("/oeanalytics/request", {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        'Content-Type': 'application/json',
+                      },
+                      
                     body: JSON.stringify({ role: "spon", email: store.state.user })
                 });
                 const data = await response.json();
@@ -135,11 +139,16 @@ const SponserOutgoing = {
                 console.error("Error fetching data:", error);
             }
         },
+        
         async deleteRequest(request_id) {
             try {
                 const response = await fetch("/oeanalytics/request", {
                     method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        'Content-Type': 'application/json',
+                      },
+                    'Content-Type': 'application/json',
                     body: JSON.stringify({ request_id })
                 });
                 const result = await response.json();

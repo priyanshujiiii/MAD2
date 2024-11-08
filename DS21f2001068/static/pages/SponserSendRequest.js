@@ -87,8 +87,8 @@ const SponserSendRequest = {
             fetch('/oeanalytics/request', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
                 body: JSON.stringify(this.form)
             })
             .then(response => {

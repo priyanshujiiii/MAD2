@@ -22,10 +22,12 @@ import AdminCampaignList from "../pages/AdminCampaignList.js";
 import AdminRequest from "../pages/AdminRequest.js";
 import AdminPayments from "../pages/AdminPayments.js";
 import InfluencerMyCampaign from "../pages/InfluencerMyCampaign.js";
+import InfluencerCampaign from "../pages/InfluencerCampaign.js";
 import InfluencerEditProfile from "../pages/InfluencerEditProfile.js";
 import InfluencerIncoming from "../pages/InfluencerIncoming.js";
 import InfluencerOutgoing from "../pages/InfluencerOutgoing.js";
 import InfluencerEditRequest from "../pages/InfluencerEditRequest.js";
+import InfluencerRequestView from "../pages/InfluencerRequestView.js";
 import InfluenecerPayments from "../pages/InfluenecerPayments.js";
 import SponserMyCampaign from "../pages/SponserMyCampaign.js";
 import SponserHire from "../pages/SponserHire.js";
@@ -36,6 +38,8 @@ import SponserOutgoing from "../pages/SponserOutgoing.js";
 import SponserSendRequest from "../pages/SponserSendRequest.js";
 import SponserEditRequest from "../pages/SponserEditRequest.js";
 import SponserPayments from "../pages/SponserPayments.js";
+import SponserView from "../pages/SponserView.js";
+import SponserEditProfile from "../pages/SponserEditProfile.js";
 
 
 const routes = [
@@ -63,13 +67,17 @@ const routes = [
   { path: "/oeanalytics/InfluencerDashboard/Explore/campaign/SendRequest/form", component: InfluencerSendRequest },
   { path: "/oeanalytics/InfluencerDashboard", component: InfluencerDash },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerMyCampaign", component: InfluencerMyCampaign },
+  { path: "/oeanalytics/InfluencerDashboard/InfluencerMyCampaign/id", component: InfluencerCampaign },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerEditProfile", component: InfluencerEditProfile },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerIncoming", component: InfluencerIncoming },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerOutgoing", component: InfluencerOutgoing },
   { path: "/oeanalytics/InfluencerDashboard/InfluencerOutgoing/edit", component: InfluencerEditRequest },
+  { path: "/oeanalytics/InfluencerDashboard/InfluencerRequestView", component: InfluencerRequestView },
   { path: "/oeanalytics/InfluencerDashboard/InfluenecerPayments", component: InfluenecerPayments },
   { path: "/oeanalytics/SponserDashboard", component: SponserDash },
+  { path: "/oeanalytics/SponserDashboard/EditProfile", component: SponserEditProfile },
   { path: "/oeanalytics/SponserDashboard/SponserMyCampaign", component: SponserMyCampaign },
+  { path: "/oeanalytics/SponserDashboard/SponserMyCampaign/id", component: SponserView },
   { path: "/oeanalytics/SponserDashboard/SponserMyCampaign/hire", component: SponserHire },
   { path: "/oeanalytics/SponserDashboard/SponserNewCampaign", component: SponserNewCampaign },
   { path: "/oeanalytics/SponserDashboard/SponserEditCampaign", component: SponserEditCampaign },

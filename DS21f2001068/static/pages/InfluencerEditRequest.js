@@ -1,5 +1,4 @@
-const InfluencerEditRequest ={
-    
+const InfluencerEditRequest = {
     template: `
     <div>
         <!-- Navigation Bar -->
@@ -20,22 +19,19 @@ const InfluencerEditRequest ={
             </div>
         </nav>
 
-        <div class="main-content">
+        <div class="main-content row">
             <!-- Left Sidebar with Options -->
             <div class="sidebar col-md-2">
                 <h3 class="mt-4 mb-4 text-center">Influencer Dashboard</h3>
                 <ul class="list-group">
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerMyCampaign" class="list-group-item">My Campaign</router-link>
-                    <router-link to="/oeanalytics/InfluencerDashboard/InfluencerEditProfile" class="list-group-item">Edit Profile</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluencerOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
                     <router-link to="/oeanalytics/InfluencerDashboard/InfluenecerPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
-             <!-- Right Section with Form Container -->
+            <!-- Right Section with Form Container -->
             <div class="col-md-9">
                 <div class="card shadow-sm">
                     <div class="card-header">
@@ -49,11 +45,11 @@ const InfluencerEditRequest ={
                             </div>
                             <div class="form-group">
                                 <label for="Message">Message</label>
-                                <textarea class="form-control" id="Message" v-model="form.messages" rows="3" placeholder="Enter Message" ></textarea>
+                                <textarea class="form-control" id="Message" v-model="form.messages" rows="3" placeholder="Enter Message"></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="Amount">Amount</label>
-                                <input type="text" class="form-control" id="Amount" v-model="form.payment_amount" placeholder="Enter Amount" >
+                                <input type="text" class="form-control" id="Amount" v-model="form.payment_amount" placeholder="Enter Amount">
                             </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
@@ -71,6 +67,7 @@ const InfluencerEditRequest ={
     data() {
         return {
             logoutURL: window.location.origin + "/logout",
+            data: {},
             form: {
                 requirements: "",
                 messages: "",
@@ -80,12 +77,12 @@ const InfluencerEditRequest ={
     },
     methods: {
         fetchRequestDetails() {
-            // Use the PUT method to retrieve existing details
             fetch(`/oeanalytics/request`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
+                  },
                 body: JSON.stringify({ id: this.$route.query.request_id })
             })
             .then(response => {
@@ -93,20 +90,25 @@ const InfluencerEditRequest ={
                 return response.json();
             })
             .then(data => {
-                // Populate form fields with fetched data
-                this.form.requirements = data.requirements || "";
-                this.form.messages = data.messages || "";
-                this.form.payment_amount = data.payment_amount || "";
+                if (data.length > 0) {
+                    this.data = data[0]; // Access the first object in the array
+                    // Assign data properties to form fields for two-way binding
+                    this.form.requirements = this.data.requirements || "";
+                    this.form.messages = this.data.messages || "";
+                    this.form.payment_amount = this.data.payment_amount || "";
+                } else {
+                    console.warn("No data found for the given request ID.");
+                }
             })
             .catch(error => console.error("Error fetching request details:", error));
         },
         sendRequest() {
-            // Use PATCH method to update the request details
             fetch(`/oeanalytics/request`, {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
+                  },
                 body: JSON.stringify({
                     id: this.$route.query.request_id,
                     requirements: this.form.requirements,
@@ -124,6 +126,5 @@ const InfluencerEditRequest ={
     mounted() {
         this.fetchRequestDetails(); // Fetch existing details when component is mounted
     }
-
 }
 export default InfluencerEditRequest;

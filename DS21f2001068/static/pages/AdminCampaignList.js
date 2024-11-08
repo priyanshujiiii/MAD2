@@ -52,6 +52,7 @@ const AdminCampaignList = {
                             <th>Budget</th>
                             <th>Alloted</th>
                             <th>Payment</th>
+                            <th>Approval</th> <!-- Added column for Approval -->
                             <th>Delete</th>
                             <th>Action</th>
                         </tr>
@@ -65,11 +66,37 @@ const AdminCampaignList = {
                             <td>{{ campaign.end_date }}</td>
                             <td>{{ campaign.visibility }}</td>
                             <td>{{ campaign.budget }}</td>
-                            <td>{{ campaign.alloted }}</td>
-                            <td>{{ campaign.payment }}</td>
-                            <td><button @click="deleteCampaign(campaign.campaignid)" class="btn btn-danger">Delete</button></td>
+                            <td>{{ campaign.alloted === 1 ? 'Hired' : 'Pending' }}</td>
+                            <td>{{ campaign.payment === 1 ? 'Paid' : 'Pending' }}</td>
                             <td>
-                                <button @click="toggleFlag(campaign.campaignid, campaign.flag)" class="btn btn-warning">
+                                <!-- Show Approval Status and Approve Button -->
+                                <span>{{ campaign.approval === 0 ? 'Approval Pending' : 'Approved' }}</span>
+                                <button 
+                                    v-if="campaign.approval === 0" 
+                                    @click="approveCampaign(campaign.campaignid)" 
+                                    class="btn btn-success mt-2">
+                                    Approve
+                                </button>
+                                <button 
+                                    v-if="campaign.approval === 1" 
+                                    class="btn btn-success mt-2" 
+                                    disabled>
+                                    Approved
+                                </button>
+                            </td>
+                            <td>
+                                <button 
+                                    @click="deleteCampaign(campaign.campaignid)" 
+                                    class="btn btn-danger" 
+                                    :disabled="campaign.alloted === 1">
+                                    Delete
+                                </button>
+                            </td>
+                            <td>
+                                <button 
+                                    @click="toggleFlag(campaign.campaignid, campaign.flag)" 
+                                    class="btn btn-warning" 
+                                    :disabled="campaign.alloted === 1">
                                     {{ campaign.flag === 0 ? 'Flag' : 'Unflag' }}
                                 </button>
                             </td>
@@ -112,7 +139,13 @@ const AdminCampaignList = {
     methods: {
         // Fetch all campaigns
         fetchCampaigns() {
-            fetch('/oeanalytics/campaign', { method: 'GET' })
+            fetch('/oeanalytics/campaign', { 
+                method: 'GET' ,
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    'Content-Type': 'application/json',
+                },
+            })
                 .then(response => response.json())
                 .then(data => {
                     this.campaigns = data;
@@ -125,8 +158,9 @@ const AdminCampaignList = {
             fetch('/oeanalytics/campaign', {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    'Content-Type': 'application/json',
+                  },
                 body: JSON.stringify({ campaign_id: campaignid })
             })
             .then(response => {
@@ -144,8 +178,9 @@ const AdminCampaignList = {
             fetch('/oeanalytics/campaign', {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    'Content-Type': 'application/json',
+                  },
                 body: JSON.stringify({ campaign_id: campaignid, flag: newFlag })
             })
             .then(response => {
@@ -158,6 +193,30 @@ const AdminCampaignList = {
                     });
                 } else {
                     console.error('Error updating flag status');
+                }
+            });
+        },
+
+        // Approve a campaign
+        approveCampaign(campaignid) {
+            fetch('/oeanalytics/campaign', {
+                method: 'PATCH',
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ campaign_id: campaignid, approval: 1 })
+            })
+            .then(response => {
+                if (response.ok) {
+                    this.campaigns = this.campaigns.map(campaign => {
+                        if (campaign.campaignid === campaignid) {
+                            return { ...campaign, approval: 1 };
+                        }
+                        return campaign;
+                    });
+                } else {
+                    console.error('Error approving campaign');
                 }
             });
         }

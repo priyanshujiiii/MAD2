@@ -36,12 +36,10 @@ const SponserNewCampaign = {
             <!-- Right Section for Detail Editing -->
             <div class="col-md-9">
                 <div class="container">
+                <h1>Create New Campaign</h1>
                     <div class="row mt-4">
                         <div class="col">
                             <div class="card">
-                                <div class="card-header">
-                                    <h4>Create New Campaign</h4>
-                                </div>
                                 <div class="card-body">
                                     <form @submit.prevent="submitCampaign" id="campaignForm">
                                         <div class="row">
@@ -138,6 +136,9 @@ const SponserNewCampaign = {
         fetchCategories() {
             fetch('/oeanalytics/categories', {
                 method: 'GET',
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
             })
             .then(response => response.json())
             .then(data => {
@@ -154,8 +155,8 @@ const SponserNewCampaign = {
             fetch('/oeanalytics/campaign', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                  },
                 body: JSON.stringify(this.campaign),
             })
             .then(response => {

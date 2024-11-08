@@ -38,7 +38,7 @@ from flask import redirect, abort
 from sqlalchemy.orm import relationship
 from flask import flash
 from sqlalchemy import desc
-from flask_security import UserMixin,RoleMixin,Security,SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_user
+from flask_security import UserMixin,RoleMixin,Security,SQLAlchemyUserDatastore, UserMixin, RoleMixin, login_user,auth_required, roles_required,roles_accepted
 from flask_security.models import fsqla_v3 as fsq
 from flask_security.utils import hash_password, verify_password
 from flask_wtf.csrf import CSRFProtect
@@ -141,6 +141,7 @@ class Campaign(db.Model):
     flag = db.Column(db.Integer, nullable=False)
     alloted = db.Column(db.Integer, nullable=False)
     payment = db.Column(db.Integer, nullable=False)
+    approval = db.Column(db.Integer, nullable=False)
 
 class Influencer(db.Model):
     __tablename__ = 'influencer'
@@ -211,6 +212,7 @@ class Sponsor(db.Model):
     bio = db.Column(db.String, nullable=False)
     flag = db.Column(db.Integer, nullable=False)
     wallet = db.Column(db.Integer, nullable=False)
+    approval = db.Column(db.Integer, nullable=False)
 
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -333,11 +335,14 @@ CategoryResourcess = {
 }
 
 class CategoryResource(Resource):
+    
     @marshal_with(CategoryResources)
     def get(self):
         category = Category.query.all()
         return category
     
+    @auth_required('token')
+    @roles_required('admin')
     def post(self):
         data = request.get_json()
 
@@ -362,7 +367,8 @@ class CategoryResource(Resource):
         
         return {'message': 'Category created successfully'}, 201
 
-
+    @auth_required('token')
+    @roles_required('admin')
     def patch(self):
     # Retrieve JSON data from the request
         data = request.get_json()
@@ -386,7 +392,8 @@ class CategoryResource(Resource):
 
         return {'message': 'Category partially updated successfully'}, 200
 
-
+    @auth_required('token')
+    @roles_required('admin')
     def delete(self):
         # Retrieve JSON data from the request
         data = request.get_json()
@@ -405,6 +412,8 @@ class CategoryResource(Resource):
 
         return {'message': 'Category deleted successfully'}, 200
     
+    @auth_required('token')
+    @roles_accepted('admin','influ')
     @marshal_with(CategoryResourcess)
     def put(self):
         result = (
@@ -412,7 +421,7 @@ class CategoryResource(Resource):
                 Category.category,
                 func.count(Campaign.campaignid).label("count")
             )
-            .outerjoin(Campaign, (Category.category == Campaign.category) & (Campaign.alloted == 0))
+            .outerjoin(Campaign, (Category.category == Campaign.category) & (Campaign.alloted == 0) & (Campaign.flag == 0))
             .group_by(Category.category)
             .all()
         )
@@ -438,7 +447,8 @@ campaign_fields = {
     'budget': fields.Integer,
     'flag': fields.Integer,
     'alloted': fields.Integer,
-    'payment': fields.Integer
+    'payment': fields.Integer,
+    'approval':fields.Integer
 }
 
 influencer_fields = {
@@ -504,17 +514,22 @@ sponsor_fields = {
     'positions': fields.String,
     'bio': fields.String,
     'flag': fields.Integer,
-    'wallet': fields.Integer
+    'wallet': fields.Integer,
+    'approval':fields.Integer
 }
 
 # API Resources
 
 class CampaignAPI(Resource):
+    @auth_required('token')
+    @roles_accepted('admin')
     @marshal_with(campaign_fields)
     def get(self):
         campaigns = Campaign.query.all()
         return campaigns, 200
 
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(campaign_fields)
     def post(self):
         data = request.get_json()
@@ -536,19 +551,37 @@ class CampaignAPI(Resource):
         db.session.commit()
         return new_campaign, 201
 
+    @auth_required('token')
+    @roles_accepted('spon', 'influ', 'admin')
     @marshal_with(campaign_fields)
     def patch(self):
         data = request.get_json()
-        campaign = Campaign.query.get(data['campaignid'])
+        print(data)
+        campaign = Campaign.query.get(data['campaign_id'])
         if not campaign:
             return {'message': 'Campaign not found'}, 404
 
         for key, value in data.items():
-            setattr(campaign, key, value)
-
+            setattr(campaign, key, value)  # This updates the campaign fields with the new values.
+            if key == 'flag':
+                print(campaign.campaignid)
+                if value == 1:
+                    requests = Request.query.filter_by(status=0, campaign_id=campaign.campaignid).all()
+                    for request1 in requests:
+                        request1.status = 4
+                    db.session.commit()
+                else:
+                    requests = Request.query.filter_by(status=4, campaign_id=campaign.campaignid).all()
+                    for request1 in requests:
+                        request1.status = 0
+                    db.session.commit()
+        
         db.session.commit()
         return campaign, 200
 
+    
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     def delete(self):
         data = request.get_json()
         campaign = Campaign.query.get(data['campaignid'])
@@ -559,26 +592,60 @@ class CampaignAPI(Resource):
         db.session.commit()
         return {'message': 'Campaign deleted'}, 200
     
+    @auth_required('token') 
+    @roles_accepted('spon','influ','admin')
     @marshal_with(campaign_fields)
     def put(self):
         data = request.get_json()
         desired_category = data.get('category')
 
         # Filter campaigns based on the specified conditions
-        campaigns = Campaign.query.filter_by(
-            category=desired_category,
-            alloted=0,  # Corrected spelling
-            visibility='Public'  # Assuming visibility is case-sensitive
-        ).all()
-        return campaigns, 200
+        if desired_category:
+            campaigns = Campaign.query.filter_by(
+                category=desired_category,
+                alloted=0,
+                flag=0,  # Corrected spelling
+                visibility='Public'  # Assuming visibility is case-sensitive
+            ).all()
+            return campaigns, 200
 
+
+        role = data.get('role')
+        email = data.get('email')
+        if role:
+            if role == 'spon':
+                campaigns = Campaign.query.filter_by(email=email).all()
+                return campaigns,200
+        
+        if role:
+            if role =='influ':
+                campaigns = (
+                    db.session.query(Campaign)
+                    .join(Request, Campaign.campaignid == Request.campaign_id)
+                    .filter(Request.influencer_email == email, Request.status == 1)
+                    .all()
+                )
+                return campaigns,200
+        
+        id = data.get('id')
+        if id:
+            campaign = Campaign.query.filter_by(campaignid=id).first()
+            return campaign,200
+            
+            
+        
+        
 
 class InfluencerAPI(Resource):
+    @auth_required('token')
+    @roles_accepted('admin')
     @marshal_with(influencer_fields)
     def get(self):
         influencers = Influencer.query.all()
         return influencers, 200
 
+    @auth_required('token')
+    @roles_accepted('influ')
     @marshal_with(influencer_fields)
     def post(self):
         data = request.get_json()
@@ -609,6 +676,8 @@ class InfluencerAPI(Resource):
         db.session.commit()
         return new_influencer, 201
 
+    @auth_required('token')
+    @roles_accepted('influ','admin')
     @marshal_with(influencer_fields)
     def patch(self):
         data = request.get_json()
@@ -618,10 +687,23 @@ class InfluencerAPI(Resource):
 
         for key, value in data.items():
             setattr(influencer, key, value)
+            if key == 'flag':
+                if value == 1:
+                    requests = Request.query.filter_by(status=0, influencer_email=influencer.email).all()
+                    for request1 in requests:
+                        request1.status = 5
+                    db.session.commit()
+                else:
+                    requests = Request.query.filter_by(status=5, influencer_email=influencer.email).all()
+                    for request1 in requests:
+                        request1.status = 0
+                    db.session.commit()
+
 
         db.session.commit()
         return influencer, 200
 
+    @auth_required('token')
     def delete(self):
         data = request.get_json()
         influencer = Influencer.query.get(data['email'])
@@ -632,6 +714,8 @@ class InfluencerAPI(Resource):
         db.session.commit()
         return {'message': 'Influencer deleted'}, 200
     
+    @auth_required('token')
+    #@roles_accepted()
     @marshal_with(influencer_fields)
     def put(self):
         data = request.get_json()
@@ -659,17 +743,29 @@ class InfluencerAPI(Resource):
 
 
 class PaymentAPI(Resource):
+    @auth_required('token')
+    @roles_accepted('admin')
     @marshal_with(payment_fields)
     def get(self):
         payments = Payment.query.all()
         return payments, 200
 
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(payment_fields)
     def post(self):
         data = request.get_json()
         request_id = data.get('request')
         r = Request.query.filter_by(request_id=request_id).first()
         r.status = 1
+        db.session.commit()
+        c = Campaign.query.filter_by(campaignid = r.campaign_id).first()
+        c.alloted = 1
+        db.session.commit()
+        k = Request.query.filter_by(status=0,campaign_id=r.campaign_id).all()
+        for i in k:
+            i.status = 3
+            db.session.commit()
 
         new_payment = Payment(
             influencer_email=r.influencer_email,
@@ -683,6 +779,8 @@ class PaymentAPI(Resource):
         db.session.commit()
         return new_payment, 201
 
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(payment_fields)
     def patch(self):
         data = request.get_json()
@@ -701,7 +799,8 @@ class PaymentAPI(Resource):
         db.session.commit()
         return payment, 200
 
-
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     def delete(self):
         data = request.get_json()
         payment = Payment.query.get(data['id'])
@@ -712,6 +811,8 @@ class PaymentAPI(Resource):
         db.session.commit()
         return {'message': 'Payment deleted'}, 200
     
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(payment_fields)
     def put(self):
         data = request.get_json()
@@ -725,11 +826,15 @@ class PaymentAPI(Resource):
             return payment,200
 
 class RequestAPI(Resource):
+    @auth_required('token')
+    @roles_accepted('admin')
     @marshal_with(request_fields)
     def get(self):
         requests = Request.query.all()
         return requests, 200
 
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(request_fields)
     def post(self):
         data = request.get_json()
@@ -753,22 +858,29 @@ class RequestAPI(Resource):
         db.session.commit()
         return new_request, 201
 
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(request_fields)
     def patch(self):
         data = request.get_json()
         request_id = data.get('id')
+        messages = data.get('messages')
+        requirements = data.get('requirements')
+        payment_amount	= data.get('payment_amount')
         request_record = Request.query.filter_by(request_id=request_id).first()
-        print(request_id)
-        if not request_record:
-            return {'message': 'Request not found'}, 404
-
-        for key, value in data.items():
-            if  key != 'id':
-                setattr(request_record, key, value)
-
-        db.session.commit()
+        if messages:
+            request_record.messages = messages
+            db.session.commit()
+        if requirements:
+            request_record.requirements = requirements
+            db.session.commit()
+        if payment_amount:
+            request_record.payment_amount = payment_amount
+            db.session.commit()
         return request_record, 200
-
+    
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     def delete(self):
         data = request.get_json()
         request_record = Request.query.get(data['request_id'])
@@ -779,6 +891,8 @@ class RequestAPI(Resource):
         db.session.commit()
         return {'message': 'Request deleted'}, 200
     
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(request_fields)
     def put(self):
         data = request.get_json()
@@ -824,15 +938,16 @@ class RequestAPI(Resource):
         
         return requests, 200
 
-
-
-
 class SponsorAPI(Resource):
+    @auth_required('token')
+    @roles_accepted('admin')
     @marshal_with(sponsor_fields)
     def get(self):
         sponsors = Sponsor.query.all()
         return sponsors, 200
 
+    @roles_accepted('spon','influ','admin')
+    @auth_required('token')
     @marshal_with(sponsor_fields)
     def post(self):
         data = request.get_json()
@@ -856,20 +971,42 @@ class SponsorAPI(Resource):
         db.session.add(new_sponsor)
         db.session.commit()
         return new_sponsor, 201
-
+    
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(sponsor_fields)
     def patch(self):
         data = request.get_json()
         sponsor = Sponsor.query.get(data['email'])
         if not sponsor:
             return {'message': 'Sponsor not found'}, 404
+        campaigns = Campaign.query.filter_by(email = sponsor.email).all()
 
         for key, value in data.items():
             setattr(sponsor, key, value)
+            if key == 'flag':
+                if value ==1:
+                    for campaign in campaigns:
+                        campaign.flag = 1
+                        requests = Request.query.filter_by(status=0, campaign_id=campaign.campaignid).all()
+                        for request1 in requests:
+                            request1.status = 6
+                        db.session.commit()
+                else:
+                    for campaign in campaigns:
+                        campaign.flag = 0
+                        requests = Request.query.filter_by(status=6, campaign_id=campaign.campaignid).all()
+                        for request1 in requests:
+                            request1.status = 0
+                        db.session.commit()
+                    
+                    db.session.commit()
 
         db.session.commit()
         return sponsor, 200
-
+    
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     def delete(self):
         data = request.get_json()
         sponsor = Sponsor.query.get(data['email'])
@@ -880,6 +1017,8 @@ class SponsorAPI(Resource):
         db.session.commit()
         return {'message': 'Sponsor deleted'}, 200
     
+    @auth_required('token')
+    @roles_accepted('spon','influ','admin')
     @marshal_with(sponsor_fields)
     def put(self):
         data = request.get_json() 

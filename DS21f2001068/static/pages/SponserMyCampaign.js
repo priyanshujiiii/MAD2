@@ -1,4 +1,5 @@
 import store from "../utils/store.js";
+
 const SponserMyCampaign = {
     template: `
     <div>
@@ -16,7 +17,6 @@ const SponserMyCampaign = {
                     <li class="nav-item">
                         <button class="btn btn-link nav-link" @click.prevent="handleLogout">Logout</button>
                     </li>
-
                 </ul>
             </div>
         </nav>
@@ -30,7 +30,6 @@ const SponserMyCampaign = {
                     <router-link to="/oeanalytics/SponserDashboard/SponserNewCampaign" class="list-group-item">New Campaign</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserIncoming" class="list-group-item">Incoming Ad Request</router-link>
                     <router-link to="/oeanalytics/SponserDashboard/SponserOutgoing" class="list-group-item">Outgoing Ad Request</router-link>
-                    
                     <router-link to="/oeanalytics/SponserDashboard/SponserPayments" class="list-group-item">Payments</router-link>
                 </ul>
             </div>
@@ -52,6 +51,8 @@ const SponserMyCampaign = {
                                         <th style="font-size: 17px;">End Date</th>
                                         <th style="font-size: 17px;">Visibility</th>
                                         <th style="font-size: 17px;">Budget</th>
+                                        <th style="font-size: 17px;">Status</th>
+                                        <th style="font-size: 17px;">Alloted</th>
                                         <th style="font-size: 17px;">Edit</th>
                                         <th style="font-size: 17px;">Delete</th>
                                         <th style="font-size: 17px;">View</th>
@@ -67,10 +68,19 @@ const SponserMyCampaign = {
                                         <td>{{ campaign.end_date }}</td>
                                         <td>{{ campaign.visibility }}</td>
                                         <td>{{ campaign.budget }}</td>
-                                        <td><button class="btn btn-warning" @click="editCampaign(campaign)">Edit</button></td>
-                                        <td><button class="btn btn-danger" @click="deleteCampaign(campaign.campaignid)">Delete</button></td>
-                                        <td><button class="btn btn-info" @click="viewCampaign(campaign.campaignid)">Track</button></td>
-                                        <td><button class="btn btn-info" @click="hire(campaign.campaignid)">Hire</button></td>
+                                        <!-- Status Column -->
+                                        <td>
+                                            <span :style="{ color: campaign.flag === 1 ? 'red' : 'green' }">
+                                                {{ campaign.flag === 1 ? 'Banned' : 'Open' }}
+                                            </span>
+                                        </td>
+                                        <!-- Alloted Column -->
+                                        <td>{{ campaign.alloted === 1 ? 'Hired' : 'Pending' }}</td>
+                                        <!-- Buttons -->
+                                        <td><button class="btn btn-warning" @click="editCampaign(campaign)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Edit</button></td>
+                                        <td><button class="btn btn-danger" @click="deleteCampaign(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Delete</button></td>
+                                        <td><button class="btn btn-info" @click="viewCampaign(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Track</button></td>
+                                        <td><button class="btn btn-info" @click="hire(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Hire</button></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -96,7 +106,12 @@ const SponserMyCampaign = {
         // Fetch campaigns from API when component is mounted
         fetchCampaigns() {
             fetch("/oeanalytics/campaign", {
-                method: "GET"
+                method: "PUT",
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: store.state.user, role: 'spon' })
             })
             .then(response => response.json())
             .then(data => {
@@ -110,64 +125,55 @@ const SponserMyCampaign = {
         editCampaign(item) {
             this.$router.push({ 
                 path: '/oeanalytics/SponserDashboard/SponserEditCampaign', 
-                query: { item:item } 
+                query: { item: item } 
             });
         },
         // Delete campaign
         deleteCampaign(campaignId) {
-            // Make a DELETE request to the API
             fetch('/oeanalytics/campaign', {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({campaignid:campaignId }), // Send the category name
+                body: JSON.stringify({ campaignid: campaignId })
             })
-            .then(response => {
-                if (response.ok) { // Check if the response status indicates success (2xx)
-                    return response.json(); // Convert the response to JSON
-                } else {
-                    return response.json().then(errData => {
-                        // If the response is not ok, throw an error with the message from the server
-                        throw new Error(errData.message || "Failed to delete category");
-                    });
-                }
-            })
-            .then(data => {
-                // Successfully deleted the category, re-fetch the categories
-                this.fetchCampaigns(); // Call the method to refresh the categories
+            .then(response => response.json())
+            .then(() => {
+                this.fetchCampaigns(); // Refresh the campaigns
             })
             .catch(error => {
                 console.error("Error deleting Campaigns:", error);
                 alert("There was an error deleting the Campaigns: " + error.message);
             });
         },
-        hire(campaign) {
-            // Pass the campaign details as query parameters
+        hire(campaignId) {
             this.$router.push({ 
                 path: '/oeanalytics/SponserDashboard/SponserMyCampaign/hire', 
-                query: { campaign: JSON.stringify(campaign) } 
+                query: { campaign: JSON.stringify(campaignId) } 
             });
         },
-        
         handleLogout() {
-            // Commit the logout mutation to clear user state
             store.commit('logout');
             fetch("/logout", {
-                method: "POST"
+                method: "POST",
+                headers: {
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                }
             })
             .then(() => {
-                console.log("error")
-                // Redirect user to login or another page
-                this.$router.push('/oeanalytics'); // Adjust the route as per your app
-              }).catch(err => {
+                this.$router.push('/oeanalytics');
+            })
+            .catch(err => {
                 console.error("Logout error:", err);
-              });
-          },
+            });
+        },
         // View campaign
         viewCampaign(campaignId) {
-            // Logic to view campaign details (you may redirect to a view page)
-            console.log("View campaign", campaignId);
+            this.$router.push({ 
+                path: '/oeanalytics/SponserDashboard/SponserMyCampaign/id', 
+                query: { id: campaignId } 
+            });
         },
     },
     mounted() {

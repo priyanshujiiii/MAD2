@@ -150,8 +150,9 @@ const SponserHire = {
             fetch('/oeanalytics/influencer', {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
+                  },
                 body: JSON.stringify({ campaign_id: this.$route.query.campaign })
             })
             .then(response => response.json())

@@ -77,8 +77,9 @@ const InfluencerSendRequest = {
                 const response = await fetch('/oeanalytics/request', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    },
+                        "Authentication-Token": sessionStorage.getItem("token"),
+                        "Content-Type": "application/json",
+                      },
                     body: JSON.stringify(this.form) // Ensure `this.form` is defined and contains the necessary data
                 });
         
