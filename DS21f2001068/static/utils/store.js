@@ -4,11 +4,13 @@ const store = new Vuex.Store({
       test: "to test vuex working",
       user: null, // User profile data can be stored here
       role: null,
+      loggedIn: false,
   },
   mutations: {
       setAuthToken(state, token) {
           state.authToken = token;
           localStorage.setItem("authToken", token); // Persist token in local storage
+          state.loggedIn = true;
       },
       setUser(state, user) {
           state.user = user;
