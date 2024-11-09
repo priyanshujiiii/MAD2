@@ -43,7 +43,7 @@ from flask_security.models import fsqla_v3 as fsq
 from flask_security.utils import hash_password, verify_password
 from flask_wtf.csrf import CSRFProtect
 from flask_restful import Resource,Api, reqparse, marshal_with, fields
-
+from flask_caching import Cache
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -58,7 +58,7 @@ from flask_restful import Resource,Api, reqparse, marshal_with, fields
 
 app = Flask(__name__)
 security = Security()
-
+cache = Cache(app)
 current_dir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'should-not-be-seen'
@@ -69,6 +69,15 @@ app.config['DEBUG'] = True
 app.config['SECURITY_PASSWORD_SALT'] = 'salty-password'
 app.config['SECURITY_TOKEN_AUTHENTICATION_HEADER'] = 'Authentication-Token'
 
+# cache config
+app.config["DEBUG"]= True         # some Flask specific configs
+app.config["CACHE_TYPE"]= "RedisCache"  # Flask-Caching related configs
+app.config['CACHE_REDIS_HOST'] = 'localhost'
+app.config['CACHE_REDIS_PORT'] = 6379
+app.config['CACHE_REDIS_DB'] = 0
+app.config['CACHE_REDIS_URL'] = 'redis://localhost:6379/0'
+app.config["CACHE_DEFAULT_TIMEOUT"]= 300
+cache.init_app(app)
 db = SQLAlchemy()
 db.init_app(app)
 app.app_context().push()
@@ -335,7 +344,7 @@ CategoryResourcess = {
 }
 
 class CategoryResource(Resource):
-    
+    @cache.cached(timeout=100)
     @marshal_with(CategoryResources)
     def get(self):
         category = Category.query.all()
@@ -523,6 +532,7 @@ sponsor_fields = {
 class CampaignAPI(Resource):
     @auth_required('token')
     @roles_accepted('admin')
+    @cache.cached(timeout=100)
     @marshal_with(campaign_fields)
     def get(self):
         campaigns = Campaign.query.all()
@@ -639,6 +649,7 @@ class CampaignAPI(Resource):
 class InfluencerAPI(Resource):
     @auth_required('token')
     @roles_accepted('admin')
+    @cache.cached(timeout=100)
     @marshal_with(influencer_fields)
     def get(self):
         influencers = Influencer.query.all()
@@ -745,6 +756,7 @@ class InfluencerAPI(Resource):
 class PaymentAPI(Resource):
     @auth_required('token')
     @roles_accepted('admin')
+    @cache.cached(timeout=100)
     @marshal_with(payment_fields)
     def get(self):
         payments = Payment.query.all()
@@ -828,6 +840,7 @@ class PaymentAPI(Resource):
 class RequestAPI(Resource):
     @auth_required('token')
     @roles_accepted('admin')
+    @cache.cached(timeout=100)
     @marshal_with(request_fields)
     def get(self):
         requests = Request.query.all()
@@ -941,6 +954,7 @@ class RequestAPI(Resource):
 class SponsorAPI(Resource):
     @auth_required('token')
     @roles_accepted('admin')
+    @cache.cached(timeout=100)
     @marshal_with(sponsor_fields)
     def get(self):
         sponsors = Sponsor.query.all()
