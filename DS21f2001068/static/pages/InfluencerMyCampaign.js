@@ -54,6 +54,7 @@ const InfluencerMyCampaign = {
                                         <th>Alloted</th>
                                         <th>Payment</th>
                                         <th>Actions</th>
+                                        <th>Dowmloads</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -69,6 +70,7 @@ const InfluencerMyCampaign = {
                                         <td>{{ campaign.alloted }}</td>
                                         <td>{{ campaign.payment }}</td>
                                         <td><button @click="viewCampaign(campaign.campaignid)" class="btn btn-primary btn-sm">View</button></td>
+                                        <button @click="downloadPDF(campaign.campaignid)">Download PDF</button>
                                     </tr>
                                 </tbody>
                             </table>
@@ -115,7 +117,36 @@ const InfluencerMyCampaign = {
                 path: '/oeanalytics/InfluencerDashboard/InfluencerMyCampaign/id', 
                 query: { id:campaign } 
             });
-        }
+        },
+        async downloadPDF(id) {
+            try {
+              // Start the Celery task to generate the PDF
+              const response = await fetch("/oeanalytics/contract", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id }) // Use actual values
+              });
+              
+              const data = await response.json();
+              const taskId = data.task_id;
+      
+              // Poll for task status until it's ready
+              const intervalId = setInterval(async () => {
+                const statusResponse = await fetch(`/oeanalytics/download/${taskId}`);
+                
+                if (statusResponse.status === 200) { // PDF is ready
+                  clearInterval(intervalId);
+                  // Download the PDF
+                  window.location.href = `/oeanalytics/download/${taskId}`;
+                } else if (statusResponse.status === 500) {
+                  clearInterval(intervalId);
+                  alert("Error generating PDF.");
+                }
+              }, 2000); // Poll every 2 seconds
+            } catch (error) {
+              console.error("Error initializing PDF download:", error);
+            }
+          }
     }
 }
 export default InfluencerMyCampaign;

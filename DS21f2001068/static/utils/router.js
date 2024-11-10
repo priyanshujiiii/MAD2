@@ -14,7 +14,6 @@ import InfluencerSendRequest from "../pages/InfluencerSendRequest.js";
 import SponserDash from "../components/SponserDash.js";
 import AddCategory from "../pages/AddCategory.js";
 import AdminEditCategory from "../pages/AdminEditCategory.js";
-import AdminStatistic from "../pages/AdminStatistic.js";
 import AdminCategoryList from "../pages/AdminCategoryList.js";
 import AdminInfluencerList from "../pages/AdminInfluencerList.js";
 import AdminSponserList from "../pages/AdminSponserList.js";
@@ -49,7 +48,6 @@ const routes = [
 
   { path: "/oeanalytics/AdminHome", component: AdminHome ,meta: { requiresLogin: true, role: "admin" }},
   { path: "/oeanalytics/AdminDashboard", component: AdminDash,meta: { requiresLogin: true, role: "admin" } },
-  { path: "/oeanalytics/AdminDashboard/AdminStatistic", component: AdminStatistic,meta: { requiresLogin: true, role: "admin" }},
   { path: "/oeanalytics/AdminDashboard/AdminAddCategory", component: AddCategory ,meta: { requiresLogin: true, role: "admin" }},
   { path: "/oeanalytics/AdminDashboard/AdminEditCategory", component: AdminEditCategory ,meta: { requiresLogin: true, role: "admin" }},
   { path: "/oeanalytics/AdminDashboard/AdminCategoryList", component: AdminCategoryList ,meta: { requiresLogin: true, role: "admin" }},

@@ -24,7 +24,6 @@ const AdminInfluencerList = {
             <div class="sidebar col-md-2">
                 <h3 class="mt-4 mb-4 text-center">Admin Dashboard</h3>
                 <ul class="list-group">
-                    <router-link to="/oeanalytics/AdminDashboard/AdminStatistic" class="list-group-item">Statistics</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminAddCategory" class="list-group-item">Add Category</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminCategoryList" class="list-group-item">Category List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminInfluencerList" class="list-group-item active">Influencer List</router-link>
@@ -149,7 +148,7 @@ const AdminInfluencerList = {
     methods: {
         // Fetch all influencers
         fetchInfluencers() {
-            fetch('/oeanalytics/influencer', { 
+            fetch('mics/influencer', { 
                 method: 'GET',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),

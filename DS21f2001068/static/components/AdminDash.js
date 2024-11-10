@@ -25,7 +25,6 @@ const AdminDash = {
             <div class="sidebar col-md-2">
                 <h3 class="mt-4 mb-4 text-center">Admin Dashboard</h3>
                 <ul class="list-group">
-                    <router-link to="/oeanalytics/AdminDashboard/AdminStatistic" class="list-group-item">Statistics</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminAddCategory" class="list-group-item">Add Category</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminCategoryList" class="list-group-item">Category List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminInfluencerList" class="list-group-item">Influencer List</router-link>

@@ -28,7 +28,7 @@
 ###################################################################################
 
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash,jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, flash,jsonify, session,send_file
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from sqlalchemy import func
@@ -44,6 +44,14 @@ from flask_security.utils import hash_password, verify_password
 from flask_wtf.csrf import CSRFProtect
 from flask_restful import Resource,Api, reqparse, marshal_with, fields
 from flask_caching import Cache
+from worker import celery_init_app
+from celery.result import AsyncResult
+from tasks import add, generate_pdf_task,daily_reminder
+from celery import shared_task
+from jinja2 import Template
+from weasyprint import HTML
+import os
+from celery.beat import crontab
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -70,7 +78,6 @@ app.config['SECURITY_PASSWORD_SALT'] = 'salty-password'
 app.config['SECURITY_TOKEN_AUTHENTICATION_HEADER'] = 'Authentication-Token'
 
 # cache config
-app.config["DEBUG"]= True         # some Flask specific configs
 app.config["CACHE_TYPE"]= "RedisCache"  # Flask-Caching related configs
 app.config['CACHE_REDIS_HOST'] = 'localhost'
 app.config['CACHE_REDIS_PORT'] = 6379
@@ -81,7 +88,7 @@ cache.init_app(app)
 db = SQLAlchemy()
 db.init_app(app)
 app.app_context().push()
-
+celery_app = celery_init_app(app)
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -156,7 +163,6 @@ class Influencer(db.Model):
     __tablename__ = 'influencer'
     
     email = db.Column(db.String, primary_key=True)
-    password = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
     contact = db.Column(db.Numeric, nullable=False)
     district = db.Column(db.String, nullable=False)
@@ -207,7 +213,6 @@ class Sponsor(db.Model):
     __tablename__ = 'sponsor'
     
     email = db.Column(db.String, primary_key=True)
-    password = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
     contact = db.Column(db.String, nullable=False)
     district = db.Column(db.String, nullable=False)
@@ -462,7 +467,6 @@ campaign_fields = {
 
 influencer_fields = {
     'email': fields.String,
-    'password': fields.String,
     'address': fields.String,
     'contact': fields.String,
     'district': fields.String,
@@ -510,7 +514,6 @@ request_fields = {
 
 sponsor_fields = {
     'email': fields.String,
-    'password': fields.String,
     'address': fields.String,
     'contact': fields.String,
     'district': fields.String,
@@ -662,7 +665,6 @@ class InfluencerAPI(Resource):
         data = request.get_json()
         new_influencer = Influencer(
             email=data['email'],
-            password=data['password'],
             address=data['address'],
             contact=data['contact'],
             district=data['district'],
@@ -967,7 +969,6 @@ class SponsorAPI(Resource):
         data = request.get_json()
         new_sponsor = Sponsor(
             email=data['email'],
-            password=data['password'],
             address=data['address'],
             contact=data['contact'],
             district=data['district'],
@@ -1063,7 +1064,73 @@ api.add_resource(InfluencerAPI, '/influencer')
 ###################################################################################
 ###################################################################################
 
+#celery demo 
 
+@app.route('/celerydemo')
+def celery_demo():
+    task = add.delay(10,25)
+    return jsonify({'task_id': task.id})
+
+@app.route('/get-task/<task_id>')
+def get_task(task_id):
+    result = AsyncResult(task_id)
+
+    if result.ready():
+        return jsonify({'result': result.result}), 200
+
+    else:
+
+        return "task not ready", 405
+
+
+
+
+@app.route('/oeanalytics/contract', methods=['POST'])
+def download_sponser():
+    data = request.json
+    id = data.get('id')
+    
+    # Fetch the campaign, sponsor, and influencer records
+    campaign = Campaign.query.filter_by(campaignid=id).first()
+    r1 = Request.query.filter_by(campaign_id=id, status=1).first()
+    sponsor = Sponsor.query.filter_by(email=r1.sponser_email).first()
+    influencer = Influencer.query.filter_by(email=r1.influencer_email).first()
+
+    # Convert to dictionary based on fields
+    def model_to_dict(model, fields):
+        return {key: getattr(model, key) for key in fields.keys()}
+    
+    campaign_dict = model_to_dict(campaign, campaign_fields)
+    sponsor_dict = model_to_dict(sponsor, sponsor_fields)
+    influencer_dict = model_to_dict(influencer, influencer_fields)
+
+    # Start the Celery task with the dictionaries
+    task = generate_pdf_task.delay(campaign_dict, sponsor_dict, influencer_dict)
+    
+    return jsonify({"task_id": task.id}), 202
+
+@app.route('/oeanalytics/download/<task_id>')
+def download_pdf(task_id):
+    # Check task status
+    task = generate_pdf_task.AsyncResult(task_id)
+    if task.state == 'SUCCESS':
+        pdf_file_path = task.result
+        return send_file(pdf_file_path, as_attachment=True, download_name=os.path.basename(pdf_file_path))
+    elif task.state == 'FAILURE':
+        return jsonify({"error": "Failed to generate PDF"}), 500
+    else:
+        return jsonify({"status": task.state}), 202
+
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 10 seconds.
+    sender.add_periodic_task(10.0, daily_reminder.s('test@gmail', 'Testing', '<h2> content here </h2>'), name='add every 10')
+
+    # Executes every Monday morning at 7:30 a.m.
+    #sender.add_periodic_task(
+    #    crontab(hour=22, minute=20, day_of_week=3),
+    #    daily_reminder.s('test2@gmail', 'from crontab', 'content'),
+    #)   
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -1092,6 +1159,7 @@ api.init_app(app)
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+    celery_app = celery_init_app(app)
     app.run(debug=True)
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
