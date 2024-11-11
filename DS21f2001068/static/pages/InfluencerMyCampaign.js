@@ -40,6 +40,7 @@ const InfluencerMyCampaign = {
                             <h1>My Campaigns</h1>
 
                             <!-- Campaign Table -->
+                            <div class="table__body">
                             <table class="table table-bordered">
                                 <thead >
                                     <tr>
@@ -74,6 +75,7 @@ const InfluencerMyCampaign = {
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>

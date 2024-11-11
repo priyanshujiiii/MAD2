@@ -47,6 +47,7 @@ const InfluencerOutgoing ={
                                 <button @click="filterStatus(1)" class="btn btn-outline-success">Accepted</button>
                                 <button @click="filterStatus(2)" class="btn btn-outline-danger">Rejected</button>
                             </div>
+                            <div class="table__body">
                             <table class="table table-striped table-bordered">
                                 <thead>
                                     <tr>
@@ -93,6 +94,7 @@ const InfluencerOutgoing ={
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>

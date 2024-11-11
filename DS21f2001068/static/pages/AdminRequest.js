@@ -51,6 +51,7 @@ const AdminRequest = {
                 </div>
 
                 <!-- Requests Table -->
+                <div class="table__body">
                 <table class="table table-striped table-bordered">
                     <thead>
                         <tr>
@@ -84,6 +85,7 @@ const AdminRequest = {
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 

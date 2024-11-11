@@ -2,7 +2,7 @@ import store from "../utils/store.js";
 
 const SponserHome = {
   template: `
-    <div>
+    <div style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
       <!-- Navigation Bar -->
       <nav class="navbar navbar-expand-lg navbar-dark">
         <a class="navbar-brand" href="#">Open Eye Analytics</a>
@@ -11,7 +11,7 @@ const SponserHome = {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
-            <!-- Only show these buttons if sponsor is not banned and alloted is 1 -->
+            <!-- Only show these buttons if sponsor is not banned and allotted is 1 -->
             <li class="nav-item" v-if="!isBanned && isAlloted">
               <router-link to="/oeanalytics/SponserDashboard/EditProfile" class="nav-link">Edit Profile</router-link>
             </li>
@@ -40,64 +40,22 @@ const SponserHome = {
         </div>
       </div>
 
-      <!-- Profile Details Card, shown only if not banned and alloted is 1 -->
-      <div class="carddd" v-if="!isBanned && isAlloted">
-        <h1>Profile Details</h1>
-        <div class="details-table">
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th style="font-size: 17px;">Field</th>
-                <th style="font-size: 17px;">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Email</td>
-                <td>{{ profileFields.email }}</td>
-              </tr>
-              <tr>
-                <td>Name</td>
-                <td>{{ profileFields.first_name }} {{ profileFields.last_name }}</td>
-              </tr>
-              <tr>
-                <td>Bio</td>
-                <td>{{ profileFields.bio }}</td>
-              </tr>
-              <tr>
-                <td>Company Name</td>
-                <td>{{ profileFields.company_name }}</td>
-              </tr>
-              <tr>
-                <td>Industry</td>
-                <td>{{ profileFields.industry }}</td>
-              </tr>
-              <tr>
-                <td>Positions</td>
-                <td>{{ profileFields.positions }}</td>
-              </tr>
-              <tr>
-                <td>Address</td>
-                <td>{{ profileFields.address }}</td>
-              </tr>
-              <tr>
-                <td>District</td>
-                <td>{{ profileFields.district }}</td>
-              </tr>
-              <tr>
-                <td>State</td>
-                <td>{{ profileFields.state }}</td>
-              </tr>
-              <tr>
-                <td>Pincode</td>
-                <td>{{ profileFields.pincode }}</td>
-              </tr>
-              <tr>
-                <td>Contact</td>
-                <td>{{ profileFields.contact }}</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Profile Details Card, shown only if not banned and allotted is 1 -->
+      <div class="profile-card container my-5" v-if="!isBanned && isAlloted">
+        <div class="card shadow-sm p-4">
+          <h2 class="text-center mb-4">Sponser Profile Details</h2>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="profile-field" v-for="(label, index) in firstColumnLabels" :key="index">
+                <strong>{{ label }}</strong>: {{ firstColumnFields[index] || 'Not Provided' }}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="profile-field" v-for="(label, index) in secondColumnLabels" :key="index">
+                <strong>{{ label }}</strong>: {{ secondColumnFields[index] || 'Not Provided' }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -110,10 +68,14 @@ const SponserHome = {
 
   data() {
     return {
-      profileFields: [],
+      profileFields: {},
       logoutURL: window.location.origin + "/logout",
+      firstColumnLabels: ['Email', 'First Name', 'Last Name', 'Bio', 'Address', 'District', 'State', 'Pincode', 'Contact'],
+      secondColumnLabels: ['Company Name', 'Industry', 'Positions', 'Wallet Balance', 'Approval Status'],
+      firstColumnFields: [],
+      secondColumnFields: [],
       isBanned: false, // To track if the sponsor is banned
-      isAlloted: true  // To track if the account is alloted (verified)
+      isAlloted: false, // To track if the account is allotted (verified)
     };
   },
 
@@ -139,8 +101,21 @@ const SponserHome = {
             // Check if the sponsor is banned (flag == 1)
             this.isBanned = this.profileFields.flag === 1;
 
-            // Check if the sponsor is alloted (account verified)
+            // Check if the sponsor is allotted (account verified)
             this.isAlloted = this.profileFields.approval === 1;
+
+            // Assign values to the fields arrays for display
+            this.firstColumnFields = [
+              this.profileFields.email, this.profileFields.first_name, this.profileFields.last_name,
+              this.profileFields.bio, this.profileFields.address, this.profileFields.district,
+              this.profileFields.state
+            ];
+
+            this.secondColumnFields = [
+              this.profileFields.company_name, this.profileFields.industry, this.profileFields.positions,
+              this.profileFields.wallet, this.profileFields.approval === 1 ? "Verified" : "Pending", 
+              this.profileFields.pincode, this.profileFields.contact
+            ];
           } else {
             console.error("Unexpected response format:", data);
           }
@@ -150,12 +125,11 @@ const SponserHome = {
         }
       } catch (error) {
         console.error("Error fetching sponsor profile:", error);
-        // You may want to show a user-friendly message or log the error
+        // Handle error as needed (e.g., show a message to the user)
       }
     }
   },
 
-  // Call fetchSponser method when the component is mounted
   mounted() {
     this.fetchSponser();
   }

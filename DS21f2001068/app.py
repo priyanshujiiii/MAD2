@@ -1123,14 +1123,57 @@ def download_pdf(task_id):
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
+    emails = User.query.with_entities(User.email).filter(User.email != 'admin@iitm.ac.in').all()
+    # Flatten list of tuples to a list of emails
+    email_list = [email[0] for email in emails]
     # Calls test('hello') every 10 seconds.
-    sender.add_periodic_task(10.0, daily_reminder.s('test@gmail', 'Testing', '<h2> content here </h2>'), name='add every 10')
+    sender.add_periodic_task(10.0, daily_reminder.s(email_list, 'Testing', '<h2> content here </h2>'), name='add every 10')
 
     # Executes every Monday morning at 7:30 a.m.
     #sender.add_periodic_task(
     #    crontab(hour=22, minute=20, day_of_week=3),
     #    daily_reminder.s('test2@gmail', 'from crontab', 'content'),
     #)   
+    sender.add_periodic_task(
+        crontab(hour=8, minute=0),
+        daily_reminder.s(email_list, 'Daily Reminder', 'This is your daily reminder'),
+        name='daily_notification'
+    )
+
+    # Weekly notification every Monday at 9:00 AM
+    sender.add_periodic_task(
+        crontab(hour=9, minute=0, day_of_week=1),  # Monday
+        daily_reminder.s(email_list, 'Weekly Reminder', 'This is your weekly reminder'),
+        name='weekly_notification'
+    )
+
+    # Monthly notification on the 1st day of the month at 10:00 AM
+    sender.add_periodic_task(
+        crontab(hour=10, minute=0, day_of_month=1),
+        daily_reminder.s(email_list, 'Monthly Reminder', 'This is your monthly reminder'),
+        name='monthly_notification'
+    )
+
+    # Quarterly notification on the 1st day of January, April, July, and October at 11:00 AM
+    sender.add_periodic_task(
+        crontab(hour=11, minute=0, day_of_month=1, month_of_year='1,4,7,10'),
+        daily_reminder.s(email_list, 'Quarterly Reminder', 'This is your quarterly reminder'),
+        name='quarterly_notification'
+    )
+
+    # Semi-annual notification on January 1st and July 1st at 12:00 PM
+    sender.add_periodic_task(
+        crontab(hour=12, minute=0, day_of_month=1, month_of_year='1,7'),
+        daily_reminder.s(email_list, 'Semi-Annual Reminder', 'This is your semi-annual reminder'),
+        name='semiannual_notification'
+    )
+
+    # Annual notification on January 1st at 1:00 PM
+    sender.add_periodic_task(
+        crontab(hour=13, minute=0, day_of_month=1, month_of_year='1'),
+        daily_reminder.s(email_list, 'Annual Reminder', 'This is your annual reminder'),
+        name='annual_notification'
+    )
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#

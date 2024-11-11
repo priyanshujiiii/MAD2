@@ -39,7 +39,7 @@ const SponserSendRequest = {
                 <div class="col-md-9">
                     <div class="card shadow-sm">
                         <div class="card-header">
-                            <h4>Send Request</h4>
+                            <h1>Send Request</h1>
                         </div>
                         <div class="card-body">
                             <form @submit.prevent="sendRequest">

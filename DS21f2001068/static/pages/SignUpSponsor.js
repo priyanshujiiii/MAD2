@@ -116,8 +116,8 @@ const SignUpSponsor = {
         industry: '',
         positions: '',
         contact: '',
-        logoutURL: window.location.origin + "/logout"
       },
+      logoutURL: window.location.origin + "/logout",
       categories: [] // Filled with actual categories from API
     };
   },
@@ -143,8 +143,9 @@ const SignUpSponsor = {
       fetch("/oeanalytics/sponsor", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
-        },
+          "Authentication-Token": sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+      },
         body: JSON.stringify(this.form)
       })
         .then(response => {

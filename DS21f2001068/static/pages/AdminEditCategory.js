@@ -44,7 +44,7 @@ const AdminEditCategory = {
                                     <div class="col-md-6">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h4 style="font-size: 20px;">Edit Category</h4>
+                                                <h1 >Edit Category</h1>
                                             </div>
                                             <div class="card-body">
                                                 <form @submit.prevent="submitForm" method="PATCH" id="categoryForm">

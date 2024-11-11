@@ -2,7 +2,7 @@ import store from "../utils/store.js";
 
 const SponserEditProfile = {
     template: `
-    <div>
+    <div style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
         <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg navbar-dark">
             <a class="navbar-brand" href="#">Open Eye Analytics</a>

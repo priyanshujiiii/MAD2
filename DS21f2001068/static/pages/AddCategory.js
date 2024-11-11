@@ -46,7 +46,7 @@ const AddCategory = {
                                     <div class="col-md-6">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h4 style="font-size: 20px;">Add Category</h4>
+                                                <h1 >Add Category</h1>
                                             </div>
                                             <div class="card-body">
                                                 <form @submit.prevent="submitForm" method="POST" id="categoryForm">

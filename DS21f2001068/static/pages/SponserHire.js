@@ -57,6 +57,7 @@ const SponserHire = {
                             </form>
 
                             <!-- Influencer Table -->
+                            <div class="table__body">
                             <table class="table table-bordered" v-if="filteredInfluencers.length">
                                 <thead>
                                     <tr>
@@ -99,6 +100,7 @@ const SponserHire = {
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
                             <p v-else>No results found.</p>
                         </div>
                     </div>

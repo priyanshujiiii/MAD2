@@ -43,6 +43,7 @@ const AdminPayments = {
                     <div class="row mt-4">
                         <div class="col">
                             <h1>Payments</h1>
+                            <div class="table__body">
                             <table class="table table-striped table-bordered">
                                 <thead>
                                     <tr>
@@ -69,6 +70,7 @@ const AdminPayments = {
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
                 </div>

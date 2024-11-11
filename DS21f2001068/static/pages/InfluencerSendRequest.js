@@ -12,7 +12,7 @@ const InfluencerSendRequest = {
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <router-link to="/oeanalytics/SponserDashboard" class="nav-link">Dashboard</router-link>
+                        <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
                     </li>
                     <li class="nav-item">
                         <a :href="logoutURL" class="nav-link">Logout</a>
@@ -21,15 +21,11 @@ const InfluencerSendRequest = {
             </div>
         </nav>
 
-        <div class="main-content">
+            <div class="main-content">
+            <div class="container mt-5">
+                <div class="card-body" style=" background-color: #1c1c1e" >
 
-            <!-- Right Section with Form Container -->
-            <div align="center">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h4>Send Request</h4>
-                    </div>
-                    <div class="card-body">
+                    <h1>Send Request</h1>
                         <form @submit.prevent="sendRequest">
                             <div class="form-group">
                                 <label for="Requirements">Requirements</label>
@@ -45,10 +41,9 @@ const InfluencerSendRequest = {
                             </div>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
-                    </div>
                 </div>
             </div>
-        </div>
+            </div>
 
         <!-- Footer -->
         <div class="footer text-center mt-5">

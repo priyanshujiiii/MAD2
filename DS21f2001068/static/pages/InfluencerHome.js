@@ -2,7 +2,7 @@ import store from "../utils/store.js";
 
 const InfluencerHome = {
   template: `
-    <div class="influencer-home">
+    <div class="influencer-home" style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
       <!-- Navigation Bar -->
       <nav class="navbar navbar-expand-lg navbar-dark">
         <a class="navbar-brand" href="#">Open Eye Analytics</a>
@@ -12,9 +12,6 @@ const InfluencerHome = {
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
             <!-- Logout button always visible -->
-            <li class="nav-item">
-              <a :href="logoutURL" class="nav-link">Logout</a>
-            </li>
             <!-- Other buttons hidden if account is banned -->
             <li class="nav-item" v-if="!isBanned">
               <router-link to="/oeanalytics/InfluencerDashboard/Explore" class="nav-link">Active Campaigns</router-link>
@@ -25,6 +22,9 @@ const InfluencerHome = {
             <li class="nav-item" v-if="!isBanned">
               <router-link to="/oeanalytics/InfluencerDashboard" class="nav-link">Dashboard</router-link>
             </li>
+            <li class="nav-item">
+              <a :href="logoutURL" class="nav-link">Logout</a>
+            </li>
           </ul>
         </div>
       </nav>
@@ -32,7 +32,7 @@ const InfluencerHome = {
       <!-- Profile Details Card -->
       <div class="profile-card container my-5" v-if="!isBanned">
         <div class="card shadow-sm p-4">
-          <h2 class="text-center mb-4">Profile Details</h2>
+          <h2 class="text-center mb-4">Influencer Profile Details</h2>
           <div class="row">
             <div class="col-md-6">
               <div class="profile-field" v-for="(label, index) in firstColumnLabels" :key="index">

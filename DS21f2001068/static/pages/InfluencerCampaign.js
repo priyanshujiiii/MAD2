@@ -34,47 +34,33 @@ const InfluencerCampaign = {
 
             <!-- Campaign Details Section -->
             <div class="col-md-9">
-                <div class="container mt-4">
-                    <h2 class="text-center mb-4">Campaign Details</h2>
-                    <div class="card p-4">
-                        <div v-if="campaign">
-                            <div class="row mb-3">
-                                <div class="col-md-6"><strong>Campaign ID:</strong> {{ campaign.campaignid }}</div>
-                                <div class="col-md-6"><strong>Campaign Name:</strong> {{ campaign.campaignname }}</div>
+                <div class="main-contentt">
+                    <div class="container viewcard">
+                        <h2 class="viewcard-header">Campaign Details</h2>
+                        <div class="viewcard-body">
+                            <div v-if="campaign">
+                                
+                                    <p><strong>Campaign ID:</strong> {{ campaign.campaignid }}<p>
+                                    <p><strong>Campaign Name:</strong> {{ campaign.campaignname }}<p>
+                                    <p><strong>Category:</strong> {{ campaign.category }}<p>
+                                    <p><strong>Goals:</strong> {{ campaign.goals }}<p>
+                                    <p><strong>Email:</strong> {{ campaign.email }}<p>
+                                    <p><strong>Description:</strong> {{ campaign.campaign_description }}<p>
+                                    <p><strong>Start Date:</strong> {{ campaign.start_date }}<p>
+                                    <p><strong>End Date:</strong> {{ campaign.end_date }}<p>
+                                    <p><strong>Visibility:</strong> {{ campaign.visibility }}<p>
+                                    <p><strong>Budget:</strong> {{ campaign.budget }}<p>
+                                    <p><strong>Alloted:</strong> {{ campaign.alloted }}<p>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6"><strong>Category:</strong> {{ campaign.category }}</div>
-                                <div class="col-md-6"><strong>Goals:</strong> {{ campaign.goals }}</div>
+                            <div v-else>
+                                <p>Loading campaign details...</p>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6"><strong>Email:</strong> {{ campaign.email }}</div>
-                                <div class="col-md-6"><strong>Description:</strong> {{ campaign.campaign_description }}</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6"><strong>Start Date:</strong> {{ campaign.start_date }}</div>
-                                <div class="col-md-6"><strong>End Date:</strong> {{ campaign.end_date }}</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6"><strong>Visibility:</strong> {{ campaign.visibility }}</div>
-                                <div class="col-md-6"><strong>Budget:</strong> {{ campaign.budget }}</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6"><strong>Flag:</strong> {{ campaign.flag }}</div>
-                                <div class="col-md-6"><strong>Alloted:</strong> {{ campaign.alloted }}</div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6"><strong>Payment:</strong> {{ campaign.payment }}</div>
-                            </div>
-                        </div>
-                        <div v-else>
-                            <p>Loading campaign details...</p>
-                        </div>
                         
-                        
+                        </div>
                     </div>
+
                 </div>
             </div>
-        </div>
 
         <!-- Footer -->
         <div class="footer">

@@ -27,54 +27,51 @@ const AdminCategoryList = {
                     <router-link to="/oeanalytics/AdminDashboard/AdminAddCategory" class="list-group-item">Add Category</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminCategoryList" class="list-group-item">Category List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminInfluencerList" class="list-group-item">Influencer List</router-link>
-                    <router-link to="/oeanalytics/AdminDashboard/AdminSponserList" class="list-group-item">Sponser list</router-link>
-                    <router-link to="/oeanalytics/AdminDashboard/AdminCampaignList" class="list-group-item">Campaign list</router-link>
+                    <router-link to="/oeanalytics/AdminDashboard/AdminSponserList" class="list-group-item">Sponsor List</router-link>
+                    <router-link to="/oeanalytics/AdminDashboard/AdminCampaignList" class="list-group-item">Campaign List</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminRequest" class="list-group-item">Request</router-link>
                     <router-link to="/oeanalytics/AdminDashboard/AdminPayments" class="list-group-item">Payments</router-link>
-
-                    <!-- Additional Links -->
                 </ul>
             </div>
 
-            <!-- Right Section for Detail Editing -->
-            <div class="col-md-9">
+            <!-- Right Section for Detail Editing with Scrollable Table -->
+            <div class="col-md-9" >
                 <h1 class="text-white">Category List</h1>
-                <table class="table table-bordered table-striped">
-                    <thead class="thead-dark">
-                    <tr>
-                        <th>Category</th>
-                        <th>Description</th>
-                        <th>Time</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="(item, index) in category" :key="index">
-                        <td>{{ item.category }}</td>
-                        <td>{{ item.description }}</td>
-                        <td>{{ item.date }}</td>
-                        <td>
-                        <button class="btn btn-warning btn-sm table-btn" @click="editCategory(item)">
-                            Edit
-                        </button>
-                        </td>
-                        <td>
-                        <button class="btn btn-danger btn-sm table-btn" @click="deleteCategory(item)">
-                            Delete
-                        </button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                
+                <!-- Scrollable Table Container -->
+                <div class="table__body">
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Time</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, index) in category" :key="index">
+                                <td>{{ item.category }}</td>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.date }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm table-btn" @click="editCategory(item)">Edit</button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm table-btn" @click="deleteCategory(item)">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
         </div>
 
+        <!-- Footer -->
+        <div class="footer text-center mt-4">
+            <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
+        </div>
     </div>
     `,
     data() {
@@ -84,8 +81,7 @@ const AdminCategoryList = {
         };
     },
     mounted() {
-        // Fetch data when the component is mounted
-        this.fetchCategories(); // Call the method to fetch categories
+        this.fetchCategories(); // Fetch data when the component is mounted
     },
     methods: {
         fetchCategories() {
@@ -93,11 +89,11 @@ const AdminCategoryList = {
                 method: 'GET',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
-                  },
+                },
             })
             .then(response => response.json())
             .then(data => {
-                this.category = data;  // Assign the fetched data to the category array
+                this.category = data;
             })
             .catch(error => {
                 console.error("Error fetching data:", error);
@@ -109,29 +105,25 @@ const AdminCategoryList = {
                 query: { category: item.category, description: item.description } 
             });
         },
-    
         deleteCategory(item) {
-            // Make a DELETE request to the API
             fetch('/oeanalytics/categories', {
                 method: 'DELETE',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
-                  },
-                body: JSON.stringify({ category: item.category }), // Send the category name
+                },
+                body: JSON.stringify({ category: item.category }),
             })
             .then(response => {
-                if (response.ok) { // Check if the response status indicates success (2xx)
-                    return response.json(); // Convert the response to JSON
+                if (response.ok) {
+                    return response.json();
                 } else {
                     return response.json().then(errData => {
-                        // If the response is not ok, throw an error with the message from the server
                         throw new Error(errData.message || "Failed to delete category");
                     });
                 }
             })
             .then(data => {
-                // Successfully deleted the category, re-fetch the categories
-                this.fetchCategories(); // Call the method to refresh the categories
+                this.fetchCategories();
             })
             .catch(error => {
                 console.error("Error deleting category:", error);

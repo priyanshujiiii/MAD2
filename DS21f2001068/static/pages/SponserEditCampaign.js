@@ -36,11 +36,10 @@ const SponserEditCampaign = {
             <!-- Right Section for Detail Editing -->
             <div class="col-md-9">
                 <div class="container">
-                <h1>Edit Campaign</h1>
                     <div class="row mt-4">
                         <div class="col">
                             <div class="card">
-                                
+                                <h1>Edit Campaign</h1>
                                 <div class="card-body">
                                     <form @submit.prevent="submitCampaign" id="campaignForm">
                                         <div class="row">

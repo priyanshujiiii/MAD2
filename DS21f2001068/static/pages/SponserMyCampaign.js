@@ -36,56 +36,53 @@ const SponserMyCampaign = {
 
             <!-- Right Section for Campaign Table -->
             <div class="col-md-9">
-                <div class="container">
-                    <div class="row mt-4">
-                        <div class="col">
-                            <h1>My Campaigns</h1>
-                            
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th style="font-size: 17px;">Campaign ID</th>
-                                        <th style="font-size: 17px;">Campaign Name</th>
-                                        <th style="font-size: 17px;">Category</th>
-                                        <th style="font-size: 17px;">Start Date</th>
-                                        <th style="font-size: 17px;">End Date</th>
-                                        <th style="font-size: 17px;">Visibility</th>
-                                        <th style="font-size: 17px;">Budget</th>
-                                        <th style="font-size: 17px;">Status</th>
-                                        <th style="font-size: 17px;">Alloted</th>
-                                        <th style="font-size: 17px;">Edit</th>
-                                        <th style="font-size: 17px;">Delete</th>
-                                        <th style="font-size: 17px;">View</th>
-                                        <th style="font-size: 17px;">Send Request</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="campaign in campaigns" :key="campaign.campaignid">
-                                        <td>{{ campaign.campaignid }}</td>
-                                        <td>{{ campaign.campaignname }}</td>
-                                        <td>{{ campaign.category }}</td>
-                                        <td>{{ campaign.start_date }}</td>
-                                        <td>{{ campaign.end_date }}</td>
-                                        <td>{{ campaign.visibility }}</td>
-                                        <td>{{ campaign.budget }}</td>
-                                        <!-- Status Column -->
-                                        <td>
-                                            <span :style="{ color: campaign.flag === 1 ? 'red' : 'green' }">
-                                                {{ campaign.flag === 1 ? 'Banned' : 'Open' }}
-                                            </span>
-                                        </td>
-                                        <!-- Alloted Column -->
-                                        <td>{{ campaign.alloted === 1 ? 'Hired' : 'Pending' }}</td>
-                                        <!-- Buttons -->
-                                        <td><button class="btn btn-warning" @click="editCampaign(campaign)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Edit</button></td>
-                                        <td><button class="btn btn-danger" @click="deleteCampaign(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Delete</button></td>
-                                        <td><button class="btn btn-info" @click="viewCampaign(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Track</button></td>
-                                        <td><button class="btn btn-info" @click="hire(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Hire</button></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <h1>My Campaigns</h1>
+                <div class="table__body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Campaign ID</th>
+                                <th>Campaign Name</th>
+                                <th>Category</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Visibility</th>
+                                <th>Budget</th>
+                                <th>Status</th>
+                                <th>Alloted</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                                <th>View</th>
+                                <th>Send Request</th>
+                                <th>Contract</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="campaign in campaigns" :key="campaign.campaignid">
+                                <td>{{ campaign.campaignid }}</td>
+                                <td>{{ campaign.campaignname }}</td>
+                                <td>{{ campaign.category }}</td>
+                                <td>{{ campaign.start_date }}</td>
+                                <td>{{ campaign.end_date }}</td>
+                                <td>{{ campaign.visibility }}</td>
+                                <td>{{ campaign.budget }}</td>
+                                <!-- Status Column -->
+                                <td>
+                                    <span :style="{ color: campaign.flag === 1 ? 'red' : 'green' }">
+                                        {{ campaign.flag === 1 ? 'Banned' : 'Open' }}
+                                    </span>
+                                </td>
+                                <!-- Alloted Column -->
+                                <td>{{ campaign.alloted === 1 ? 'Hired' : 'Pending' }}</td>
+                                <!-- Buttons -->
+                                <td><button class="btn btn-warning" @click="editCampaign(campaign)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Edit</button></td>
+                                <td><button class="btn btn-danger" @click="deleteCampaign(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Delete</button></td>
+                                <td><button class="btn btn-info" @click="viewCampaign(campaign.campaignid)" :disabled="campaign.flag === 1 ">View</button></td>
+                                <td><button class="btn btn-info" @click="hire(campaign.campaignid)" :disabled="campaign.flag === 1 || campaign.alloted === 1">Hire</button></td>
+                                <td><button class="btn btn-secondary" @click="downloadPDF(campaign.campaignid)" :disabled="campaign.alloted !== 1">View Contract</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -175,6 +172,36 @@ const SponserMyCampaign = {
                 query: { id: campaignId } 
             });
         },
+        // Download PDF Contract
+        async downloadPDF(id) {
+            try {
+              // Start the Celery task to generate the PDF
+              const response = await fetch("/oeanalytics/contract", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id }) // Use actual values
+              });
+              
+              const data = await response.json();
+              const taskId = data.task_id;
+      
+              // Poll for task status until it's ready
+              const intervalId = setInterval(async () => {
+                const statusResponse = await fetch(`/oeanalytics/download/${taskId}`);
+                
+                if (statusResponse.status === 200) { // PDF is ready
+                  clearInterval(intervalId);
+                  // Download the PDF
+                  window.location.href = `/oeanalytics/download/${taskId}`;
+                } else if (statusResponse.status === 500) {
+                  clearInterval(intervalId);
+                  alert("Error generating PDF.");
+                }
+              }, 2000); // Poll every 2 seconds
+            } catch (error) {
+              console.error("Error initializing PDF download:", error);
+            }
+          }
     },
     mounted() {
         // Fetch campaigns when component is mounted

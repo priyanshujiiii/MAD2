@@ -162,6 +162,7 @@ def generate_pdf_task(c, s,i):
     return pdf_file_path
 
 @shared_task
-def daily_reminder(to,sub, message):
-    send_email(to, sub, message)
+def daily_reminder(to_list,sub, message):
+    for to in to_list:
+        send_email(to, sub, message)
     return "OK"

@@ -38,7 +38,7 @@ const AdminSponserList = {
             <div class="col-md-9">
                 <h4>Sponsor List</h4>
                 <input type="text" v-model="searchQuery" placeholder="Search sponsors..." class="form-control mb-3"  />
-
+                <div class="table__body">
                 <table class="table table-bordered mt-4">
                     <thead>
                         <tr>
@@ -99,6 +99,7 @@ const AdminSponserList = {
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 

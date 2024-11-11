@@ -154,8 +154,9 @@ const SignUpInfluencer = {
         const response = await fetch('/oeanalytics/influencer', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-          },
+            "Authentication-Token": sessionStorage.getItem("token"),
+            "Content-Type": "application/json",
+        },
           body: JSON.stringify(this.formData),
         });
         

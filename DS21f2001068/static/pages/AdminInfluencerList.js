@@ -38,7 +38,7 @@ const AdminInfluencerList = {
             <div class="col-md-9">
                 <h4>Influencer List</h4>
                 <input type="text" v-model="searchQuery" placeholder="Search influencers..." class="form-control mt-4" />
-
+                <div class="table__body">
                 <table class="table table-bordered mt-4">
                     <thead>
                         <tr>
@@ -109,6 +109,7 @@ const AdminInfluencerList = {
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 
@@ -148,10 +149,11 @@ const AdminInfluencerList = {
     methods: {
         // Fetch all influencers
         fetchInfluencers() {
-            fetch('mics/influencer', { 
+            fetch('/oeanalytics/influencer', { 
                 method: 'GET',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
                   },
              })
                 .then(response => response.json())

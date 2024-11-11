@@ -19,7 +19,7 @@ const InfluencerEditRequest = {
             </div>
         </nav>
 
-        <div class="main-content row">
+        <div class="main-content">
             <!-- Left Sidebar with Options -->
             <div class="sidebar col-md-2">
                 <h3 class="mt-4 mb-4 text-center">Influencer Dashboard</h3>
@@ -33,9 +33,9 @@ const InfluencerEditRequest = {
 
             <!-- Right Section with Form Container -->
             <div class="col-md-9">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm " style="width 1000px">
                     <div class="card-header">
-                        <h4>Edit Request</h4>
+                        <h1>Edit Request</h1>
                     </div>
                     <div class="card-body">
                         <form @submit.prevent="sendRequest">

@@ -38,7 +38,7 @@ const AdminCampaignList = {
             <div class="col-md-9">
                 <h4>Campaign List</h4>
                 <input type="text" v-model="searchQuery" placeholder="Search campaigns..." class="form-control mb-3" />
-
+                <div class="table__body">
                 <table class="table table-bordered mt-4">
                     <thead>
                         <tr>
@@ -102,6 +102,7 @@ const AdminCampaignList = {
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 
