@@ -89,7 +89,8 @@ const AdminCategoryList = {
                 method: 'GET',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
-                },
+                    "Content-Type": "application/json",
+                  },
             })
             .then(response => response.json())
             .then(data => {
@@ -110,7 +111,8 @@ const AdminCategoryList = {
                 method: 'DELETE',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
-                },
+                    "Content-Type": "application/json",
+                  },
                 body: JSON.stringify({ category: item.category }),
             })
             .then(response => {

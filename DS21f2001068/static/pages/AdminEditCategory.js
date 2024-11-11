@@ -89,6 +89,7 @@ const AdminEditCategory = {
                 method: 'PATCH',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
                   },
                 body: JSON.stringify({
                     category: this.$route.query.category,

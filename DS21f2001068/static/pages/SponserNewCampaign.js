@@ -138,6 +138,7 @@ const SponserNewCampaign = {
                 method: 'GET',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
                   },
             })
             .then(response => response.json())
@@ -156,6 +157,7 @@ const SponserNewCampaign = {
                 method: 'POST',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
                   },
                 body: JSON.stringify(this.campaign),
             })

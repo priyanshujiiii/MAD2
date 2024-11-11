@@ -141,6 +141,7 @@ const AdminRequest = {
                     method: 'GET',
                     headers: {
                         "Authentication-Token": sessionStorage.getItem("token"),
+                        "Content-Type": "application/json",
                       },
                  });
                 if (response.ok) {
@@ -158,6 +159,7 @@ const AdminRequest = {
                     method: 'DELETE',
                     headers: {
                         "Authentication-Token": sessionStorage.getItem("token"),
+                        "Content-Type": "application/json",
                       },
                     body: JSON.stringify({ request_id })
                 });

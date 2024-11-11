@@ -190,6 +190,7 @@ const AdminInfluencerList = {
                 method: 'DELETE',
                 headers: {
                     "Authentication-Token": sessionStorage.getItem("token"),
+                    "Content-Type": "application/json",
                   },
                 body: JSON.stringify({ email })
             })

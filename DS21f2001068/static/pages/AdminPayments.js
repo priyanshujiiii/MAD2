@@ -104,6 +104,7 @@ const AdminPayments = {
                     method: 'GET',
                     headers: {
                         "Authentication-Token": sessionStorage.getItem("token"),
+                        "Content-Type": "application/json",
                       },
                 });
                 if (response.ok) {
