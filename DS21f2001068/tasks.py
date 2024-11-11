@@ -166,3 +166,59 @@ def daily_reminder(to_list,sub, message):
     for to in to_list:
         send_email(to, sub, message)
     return "OK"
+
+@shared_task
+def send_daily_influencer_reminders(email_list):
+   
+    if email_list:
+        # Render an HTML template for the daily reminder message
+        subject = "Daily Reminder: Pending Ad Requests"
+        message = "<h2>Please check your pending ad requests.</h2>"
+
+        # Send email to each influencer with pending requests
+        for email in email_list:
+            send_email(email, subject, message)
+    
+    return "Daily influencer reminders sent."
+
+@shared_task
+def send_daily_sponsor_reminders(email_list):
+    """
+    Daily check for pending campaign approvals or tasks for sponsors and sends reminders.
+    """
+    
+    if email_list:
+        # Render an HTML template for the daily reminder message
+        subject = "Daily Reminder: Pending Campaign Approvals"
+        message = "<h2>Please review your pending campaigns for approval or check active campaigns for updates.</h2>"
+
+        # Send email to each sponsor with pending approvals or tasks
+        for email in email_list:
+            send_email(email, subject, message)
+    
+    return "Daily sponsor reminders sent."
+
+@shared_task
+def send_monthly_influencer_report(open_campaigns,closed_campaigns,email_list):
+    """
+    Generates and sends a monthly report to each influencer, including details about campaign status and other metrics.
+    """
+
+    # Generate the report content
+    subject = "Monthly Campaign Activity Report"
+    message = f"""
+    <h2>Monthly Campaign Activity Report</h2>
+    <p>Dear Influencer,</p>
+    <p>Here is the summary of campaign activity for this month:</p>
+    <ul>
+        <li>Total Open Campaigns: {open_campaigns}</li>
+        <li>Total Closed Campaigns: {closed_campaigns}</li>
+    </ul>
+    <p>Thank you for your ongoing involvement and collaboration.</p>
+    """
+
+    # Send the report to each influencer
+    for email in email_list:
+        send_email(email, subject, message)
+    
+    return "Monthly influencer reports sent."

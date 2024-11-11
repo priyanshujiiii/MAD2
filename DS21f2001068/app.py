@@ -46,7 +46,7 @@ from flask_restful import Resource,Api, reqparse, marshal_with, fields
 from flask_caching import Cache
 from worker import celery_init_app
 from celery.result import AsyncResult
-from tasks import add, generate_pdf_task,daily_reminder
+from tasks import add, generate_pdf_task,daily_reminder,send_daily_influencer_reminders,send_daily_sponsor_reminders,send_monthly_influencer_report
 from celery import shared_task
 from jinja2 import Template
 from weasyprint import HTML
@@ -66,7 +66,7 @@ from celery.beat import crontab
 
 app = Flask(__name__)
 security = Security()
-cache = Cache(app)
+cache = Cache()
 current_dir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'should-not-be-seen'
@@ -1129,22 +1129,63 @@ def setup_periodic_tasks(sender, **kwargs):
     # Calls test('hello') every 10 seconds.
     sender.add_periodic_task(10.0, daily_reminder.s(email_list, 'Testing', '<h2> content here </h2>'), name='add every 10')
 
-    # Executes every Monday morning at 7:30 a.m.
-    #sender.add_periodic_task(
-    #    crontab(hour=22, minute=20, day_of_week=3),
-    #    daily_reminder.s('test2@gmail', 'from crontab', 'content'),
-    #)   
+    
     sender.add_periodic_task(
         crontab(hour=8, minute=0),
         daily_reminder.s(email_list, 'Daily Reminder', 'This is your daily reminder'),
         name='daily_notification'
     )
 
-    # Weekly notification every Monday at 9:00 AM
+
+    influencers_with_pending_requests = (
+        db.session.query(Influencer.email)
+        .join(Request, Request.influencer_email == Influencer.email)
+        .filter(Request.status == 0)  # Assuming 0 means pending
+        .distinct()
+        .all()
+    )
+    
+    email_list = [inf.email for inf in influencers_with_pending_requests]
     sender.add_periodic_task(
-        crontab(hour=9, minute=0, day_of_week=1),  # Monday
-        daily_reminder.s(email_list, 'Weekly Reminder', 'This is your weekly reminder'),
-        name='weekly_notification'
+        crontab(hour=18, minute=0),  # Daily at 6:00 PM
+        send_daily_influencer_reminders.s(email_list),
+        name='daily_influencer_reminder'
+    )
+    # Fetch sponsors with campaigns needing approval or other pending tasks
+    sponsors_with_pending_campaigns = (
+        db.session.query(Sponsor.email)
+        .join(Campaign, Campaign.email == Sponsor.email)
+        .filter(Campaign.approval == 0)  # Assuming 0 means pending approval
+        .distinct()
+        .all()
+    )
+    
+    email_lists = [sponsor.email for sponsor in sponsors_with_pending_campaigns]
+    sender.add_periodic_task(
+        crontab(hour=18, minute=0),  # Daily at 6:00 PM
+        send_daily_sponsor_reminders.s(email_lists),
+        name='daily_influencer_reminder'
+    )
+    # Weekly notification every Monday at 9:00 AM
+#    sender.add_periodic_task(
+#        crontab(hour=9, minute=0, day_of_week=1),  # Monday
+#        daily_reminder.s(email_list, 'Weekly Reminder', 'This is your weekly reminder'),
+#        name='weekly_notification'
+#    )
+
+
+    # Fetch all influencers' emails
+    influencers11 = db.session.query(Influencer.email).all()
+    email_list11 = [influencer.email for influencer in influencers11]
+
+    # Get the count of open and closed campaigns for the report
+    open_campaigns_count = db.session.query(Campaign).filter(Campaign.alloted == 0).count()
+    closed_campaigns_count = db.session.query(Campaign).filter(Campaign.alloted == 1).count()
+
+    sender.add_periodic_task(
+        crontab(hour=10, minute=0, day_of_month=1),
+        send_monthly_influencer_report.s(open_campaigns_count,closed_campaigns_count,email_list11),
+        name='monthly_notification'
     )
 
     # Monthly notification on the 1st day of the month at 10:00 AM
@@ -1154,26 +1195,29 @@ def setup_periodic_tasks(sender, **kwargs):
         name='monthly_notification'
     )
 
-    # Quarterly notification on the 1st day of January, April, July, and October at 11:00 AM
-    sender.add_periodic_task(
-        crontab(hour=11, minute=0, day_of_month=1, month_of_year='1,4,7,10'),
-        daily_reminder.s(email_list, 'Quarterly Reminder', 'This is your quarterly reminder'),
-        name='quarterly_notification'
-    )
+       # Quarterly notification on the 1st day of January, April, July, and October at 11:00 AM
+    # sender.add_periodic_task(
+    #     crontab(hour=11, minute=0, day_of_month=1, month_of_year='1,4,7,10'),
+    #     daily_reminder.s(email_list, 'Quarterly Reminder', 'This is your quarterly reminder'),
+    #     name='quarterly_notification'
+    # )
 
     # Semi-annual notification on January 1st and July 1st at 12:00 PM
-    sender.add_periodic_task(
-        crontab(hour=12, minute=0, day_of_month=1, month_of_year='1,7'),
-        daily_reminder.s(email_list, 'Semi-Annual Reminder', 'This is your semi-annual reminder'),
-        name='semiannual_notification'
-    )
+    # sender.add_periodic_task(
+    #     crontab(hour=12, minute=0, day_of_month=1, month_of_year='1,7'),
+    #     daily_reminder.s(email_list, 'Semi-Annual Reminder', 'This is your semi-annual reminder'),
+    #     name='semiannual_notification'
+    # )
 
     # Annual notification on January 1st at 1:00 PM
-    sender.add_periodic_task(
-        crontab(hour=13, minute=0, day_of_month=1, month_of_year='1'),
-        daily_reminder.s(email_list, 'Annual Reminder', 'This is your annual reminder'),
-        name='annual_notification'
-    )
+    # sender.add_periodic_task(
+    #     crontab(hour=13, minute=0, day_of_month=1, month_of_year='1'),
+    #     daily_reminder.s(email_list, 'Annual Reminder', 'This is your annual reminder'),
+    #     name='annual_notification'
+    # )
+
+
+
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
