@@ -107,16 +107,15 @@ const SponserHome = {
             this.isAlloted = this.profileFields.approval === 1;
 
              // Assign values to the fields arrays for display
-             this.firstColumnFields = [
+            this.firstColumnFields = [
               this.profileFields.email, this.profileFields.first_name, this.profileFields.last_name,
               this.profileFields.bio, this.profileFields.address, this.profileFields.district,
-              this.profileFields.state
+              this.profileFields.state,this.profileFields.pincode, this.profileFields.contact
             ];
 
             this.secondColumnFields = [
               this.profileFields.company_name, this.profileFields.industry, this.profileFields.positions,
               this.profileFields.wallet, this.profileFields.approval === 1 ? "Verified" : "Pending", 
-              this.profileFields.pincode, this.profileFields.contact
             ];
 
           } else {

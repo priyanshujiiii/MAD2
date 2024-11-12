@@ -1038,11 +1038,16 @@ class SponsorAPI(Resource):
     @roles_accepted('spon','influ','admin')
     @marshal_with(sponsor_fields)
     def put(self):
-        data = request.get_json() 
+        data = request.get_json()
+    # Fetch sponsor by email, raise a 404 error if not found
+
+        influencer = Sponsor.query.get(data['email'])
+        if not influencer:
+            return {'message': 'Influencer not found'}, 404
+        
+        
+        # If influencer exists, get the sponsors associated with this email
         sponsors = Sponsor.query.filter_by(email=data['email']).all()
-        print(sponsors)
-        if not sponsors:
-            {'message': 'Sponsor not found'}, 404
         return sponsors, 200
 
 
