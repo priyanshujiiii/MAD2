@@ -559,7 +559,8 @@ class CampaignAPI(Resource):
             budget=data['budget'],
             flag=data['flag'],
             alloted=data['alloted'],
-            payment=data['payment']
+            payment=data['payment'],
+            approval=0
         )
         db.session.add(new_campaign)
         db.session.commit()
@@ -703,12 +704,12 @@ class InfluencerAPI(Resource):
             setattr(influencer, key, value)
             if key == 'flag':
                 if value == 1:
-                    requests = Request.query.filter_by(status=0, influencer_email=influencer.email).all()
+                    requests = Request.query.filter_by(status=0, influencer_email=data['email']).all()
                     for request1 in requests:
                         request1.status = 5
                     db.session.commit()
                 else:
-                    requests = Request.query.filter_by(status=5, influencer_email=influencer.email).all()
+                    requests = Request.query.filter_by(status=5, influencer_email=data['email']).all()
                     for request1 in requests:
                         request1.status = 0
                     db.session.commit()

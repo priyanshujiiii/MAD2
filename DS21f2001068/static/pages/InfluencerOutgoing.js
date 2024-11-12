@@ -74,14 +74,14 @@ const InfluencerOutgoing ={
                                         <td>
                                             <button 
                                                 @click="deleteRequest(request.request_id)" 
-                                                :disabled="request.status > 2"
+                                                :disabled="request.status > 0"
                                                 class="btn btn-danger btn-sm">
-                                                {{ request.status > 2 ? 'Delete Not Allowed' : 'Delete' }}
+                                                {{ request.status > 0 ? 'Delete Not Allowed' : 'Delete' }}
                                             </button>
                                         </td>
                                         <td>
                                             <button 
-                                                v-if="request.status <= 2" 
+                                                v-if="request.status < 1" 
                                                 @click="editRequest(request.request_id)" 
                                                 class="btn btn-primary btn-sm">
                                                 Edit
