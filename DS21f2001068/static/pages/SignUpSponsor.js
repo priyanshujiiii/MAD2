@@ -1,4 +1,5 @@
 import store from "../utils/store.js";
+
 const SignUpSponsor = {
   template: `
     <div style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
@@ -11,7 +12,7 @@ const SignUpSponsor = {
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <router-link to="/oeanalytics/SponsorDashboard" class="nav-link">Dashboard</router-link>
+              <router-link to="/oeanalytics/SponserDashboard" class="nav-link">Dashboard</router-link>
             </li>
             <li class="nav-item">
               <a :href="logoutURL" class="nav-link">Logout</a>
@@ -104,7 +105,6 @@ const SignUpSponsor = {
     return {
       form: {
         email: store.state.user,
-        password: 'hide',
         first_name: '',
         last_name: '',
         address: '',

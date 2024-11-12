@@ -307,7 +307,7 @@ def Signup():
         return jsonify({'message' : 'user already exists'}), 400
     
     if role == 'spon':
-        user_datastore.create_user(email = email, password = hash_password(password), active = False, roles = ['spon'])
+        user_datastore.create_user(email = email, password = hash_password(password), active = True, roles = ['spon'])
         db.session.commit()
         return jsonify({'message' : 'Sponser succesfully created, waiting for admin approval'}), 201
     
@@ -320,6 +320,7 @@ def Signup():
         return jsonify({'message' : 'Student successfully created'})
     
     return jsonify({'message' : 'invalid role'}), 400
+
 
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>End<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<#
@@ -962,8 +963,8 @@ class SponsorAPI(Resource):
         sponsors = Sponsor.query.all()
         return sponsors, 200
 
-    @roles_accepted('spon','influ','admin')
     @auth_required('token')
+    @roles_accepted('spon')
     @marshal_with(sponsor_fields)
     def post(self):
         data = request.get_json()
@@ -980,15 +981,16 @@ class SponsorAPI(Resource):
             industry=data['industry'],
             positions=data['positions'],
             bio=data['bio'],
-            flag=10,
-            wallet=0
+            flag=0,
+            wallet=0,
+            approval=0
         )
         db.session.add(new_sponsor)
         db.session.commit()
         return new_sponsor, 201
     
     @auth_required('token')
-    @roles_accepted('spon','influ','admin')
+    @roles_accepted('spon','admin')
     @marshal_with(sponsor_fields)
     def patch(self):
         data = request.get_json()
@@ -1037,11 +1039,11 @@ class SponsorAPI(Resource):
     @marshal_with(sponsor_fields)
     def put(self):
         data = request.get_json() 
-        if data['email'] and Sponsor.query.get(data['email']):
+        sponsors = Sponsor.query.filter_by(email=data['email']).all()
+        print(sponsors)
+        if not sponsors:
             {'message': 'Sponsor not found'}, 404
-        if data['email']:
-            sponsors = Sponsor.query.filter_by(email=data['email']).all()
-            return sponsors, 200
+        return sponsors, 200
 
 
 # Registering the resources

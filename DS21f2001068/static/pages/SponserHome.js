@@ -2,7 +2,7 @@ import store from "../utils/store.js";
 
 const SponserHome = {
   template: `
-    <div style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
+    <div  style="background-image: url('/static/images/home.jpg'); background-size: cover; background-position: center; min-height: 100vh;">
       <!-- Navigation Bar -->
       <nav class="navbar navbar-expand-lg navbar-dark">
         <a class="navbar-brand" href="#">Open Eye Analytics</a>
@@ -11,7 +11,7 @@ const SponserHome = {
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ml-auto">
-            <!-- Only show these buttons if sponsor is not banned and allotted is 1 -->
+            <!-- Only show these buttons if sponsor is not banned and alloted is 1 -->
             <li class="nav-item" v-if="!isBanned && isAlloted">
               <router-link to="/oeanalytics/SponserDashboard/EditProfile" class="nav-link">Edit Profile</router-link>
             </li>
@@ -59,6 +59,7 @@ const SponserHome = {
         </div>
       </div>
 
+
       <!-- Footer -->
       <div class="footer">
         <p>&copy; 2024 Open Eye Analytics. All rights reserved.</p>
@@ -70,12 +71,13 @@ const SponserHome = {
     return {
       profileFields: {},
       logoutURL: window.location.origin + "/logout",
+      isBanned: false, // To track if the sponsor is banned
+      isAlloted: true , // To track if the account is alloted (verified)
       firstColumnLabels: ['Email', 'First Name', 'Last Name', 'Bio', 'Address', 'District', 'State', 'Pincode', 'Contact'],
       secondColumnLabels: ['Company Name', 'Industry', 'Positions', 'Wallet Balance', 'Approval Status'],
       firstColumnFields: [],
       secondColumnFields: [],
-      isBanned: false, // To track if the sponsor is banned
-      isAlloted: false, // To track if the account is allotted (verified)
+
     };
   },
 
@@ -101,11 +103,11 @@ const SponserHome = {
             // Check if the sponsor is banned (flag == 1)
             this.isBanned = this.profileFields.flag === 1;
 
-            // Check if the sponsor is allotted (account verified)
+            // Check if the sponsor is alloted (account verified)
             this.isAlloted = this.profileFields.approval === 1;
 
-            // Assign values to the fields arrays for display
-            this.firstColumnFields = [
+             // Assign values to the fields arrays for display
+             this.firstColumnFields = [
               this.profileFields.email, this.profileFields.first_name, this.profileFields.last_name,
               this.profileFields.bio, this.profileFields.address, this.profileFields.district,
               this.profileFields.state
@@ -116,6 +118,7 @@ const SponserHome = {
               this.profileFields.wallet, this.profileFields.approval === 1 ? "Verified" : "Pending", 
               this.profileFields.pincode, this.profileFields.contact
             ];
+
           } else {
             console.error("Unexpected response format:", data);
           }
@@ -125,11 +128,12 @@ const SponserHome = {
         }
       } catch (error) {
         console.error("Error fetching sponsor profile:", error);
-        // Handle error as needed (e.g., show a message to the user)
+        // You may want to show a user-friendly message or log the error
       }
     }
   },
 
+  // Call fetchSponser method when the component is mounted
   mounted() {
     this.fetchSponser();
   }
