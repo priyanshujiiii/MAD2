@@ -34,9 +34,7 @@ const InfluencerMyCampaign = {
 
             <!-- Right Section for Campaign Details -->
             <div class="col-md-9">
-                <div class="container">
-                    <div class="row mt-4">
-                        <div class="col">
+                
                             <h1>My Campaigns</h1>
 
                             <!-- Campaign Table -->
@@ -77,9 +75,7 @@ const InfluencerMyCampaign = {
                             </table>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                
         </div>
 
         <!-- Footer -->

@@ -36,9 +36,6 @@ const InfluencerOutgoing ={
             </div>
 
             <div class="col-md-9">
-                <div class="container">
-                    <div class="row mt-4">
-                        <div class="col">
                             <h1>Outgoing Ad Request</h1>
                             <!-- Status Filter Links -->
                             <div class="btn-group" role="group" aria-label="Status Filter">
@@ -56,6 +53,8 @@ const InfluencerOutgoing ={
                                         <th>Campaign ID</th>
                                         <th>Campaign Name</th>
                                         <th>Payment Amount</th>
+                                        <th>Requirements</th>
+                                        <th>Messages</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                         <th>Edit</th>
@@ -70,6 +69,8 @@ const InfluencerOutgoing ={
                                         <td>{{ request.campaign_id }}</td>
                                         <td>{{ request.campaign_name }}</td>
                                         <td>{{ request.payment_amount }}</td>
+                                        <td>{{ request.requirements }}</td>
+                                        <td>{{ request.messages }}</td>
                                         <td>{{ getStatusText(request.status) }}</td>
                                         <td>
                                             <button 
@@ -96,9 +97,6 @@ const InfluencerOutgoing ={
                             </table>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Footer -->
